@@ -1,0 +1,44 @@
+[
+  {
+    "id": "finite-run",
+    "claim": "Eight fixed 60-second laps end with a result and build string.",
+    "where": "landing page, game, README",
+    "test": "npx playwright test --grep @claim:finite-run",
+    "sandbox": "fresh browser context at /demo?test=1; choose one modifier after each accelerated lap; assert the eighth-lap result"
+  },
+  {
+    "id": "demo-sandbox",
+    "claim": "The sample run is separate and does not save real progress.",
+    "where": "landing action, demo banner, README",
+    "test": "npx playwright test --grep @claim:demo-sandbox",
+    "sandbox": "fresh browser context at /demo; assert only the demo-prefixed session storage key is written"
+  },
+  {
+    "id": "input-parity",
+    "claim": "Keyboard and touch controls both move the paddle.",
+    "where": "landing facts, game help, README",
+    "test": "npx playwright test --grep @claim:input-parity",
+    "sandbox": "fresh browser context at /play; move right by keyboard and left by the on-screen touch control"
+  },
+  {
+    "id": "local-recovery",
+    "claim": "Run progress and settings persist in this browser.",
+    "where": "game guide, privacy page, README",
+    "test": "npx playwright test --grep @claim:local-recovery",
+    "sandbox": "fresh browser context at /play; wait for save, change a setting, reload, and assert both local records"
+  },
+  {
+    "id": "local-privacy",
+    "claim": "The game has no account, ads, analytics, or personal-data requests.",
+    "where": "landing facts, privacy page, README",
+    "test": "npx playwright test --grep @claim:local-privacy",
+    "sandbox": "record every request during a fresh demo flow and assert that every origin is the product origin"
+  },
+  {
+    "id": "offline-reload",
+    "claim": "The game reloads offline after the first visit.",
+    "where": "landing page, README",
+    "test": "npx playwright test --grep @claim:offline-reload",
+    "sandbox": "new browser context at /demo; wait for service worker, reload online once, set context offline, then reload and assert the game heading"
+  }
+]

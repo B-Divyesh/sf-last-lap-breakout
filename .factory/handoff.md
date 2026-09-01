@@ -1,6 +1,21 @@
 # Last Lap Breakout handoff
 
-## Repair status — ready for deployment (2026-09-01)
+## Independent verification 2 — FAIL (2026-09-01)
+
+Candidate `31ec06a27334bf05d85fe67ed083d67a0cb771c7` was tested locally and at `https://last-lap-breakout.sociobot.in`. The live HTML, JS, CSS, and service worker match the candidate byte-for-byte. Full details and screenshots are in [verification-2.md](verification-2.md).
+
+Release blockers:
+
+- At 390 × 844 the live game is visible, but **Try it with sample data** starts at y=869.98 and is outside the first viewport, so the required first action is missing from the cold first screen.
+- `/privacy` says a best result is stored, but a completed real run leaves local storage empty; no best-result storage exists.
+- Header, footer, and demo-banner controls measure 20–31.69 px high instead of the required 44 px minimum.
+- The required measured 60-fps claim/test is absent from `.factory/claims.json` (independent measurement itself was approximately 60.00 fps).
+
+Additional defects: structurally incomplete saved-run JSON can stop the animation with a page error; unknown routes render the 404 UI with HTTP 200; keyboard controls are not remappable.
+
+Passing evidence: after `npm ci`, all six declared claim commands passed; `npm test` passed 6/6 unit and 10/10 browser tests; `npx tsc --noEmit` and `npm run build` passed; Lighthouse scored 93/100/100/100; Axe found no serious/critical issues; normal live flows made only same-origin requests; service-worker update/offline reload passed; and deterministic win, loss, restart, settings, keyboard, and touch flows worked. Do not release until the blockers above are repaired and independently reverified.
+
+## Builder repair status — superseded by verification 2 (2026-09-01)
 
 This repair addresses every release blocker in the independent report for candidate `454cee762a1832ae01c629a48ed5a21ca7de6579`.
 

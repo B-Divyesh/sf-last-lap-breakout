@@ -28,6 +28,20 @@
     "sandbox": "fresh browser context at /play; wait for save, change a setting, reload, and assert both local records"
   },
   {
+    "id": "best-result",
+    "claim": "A completed real run saves its best result in this browser.",
+    "where": "end screen, privacy page, README",
+    "test": "npx playwright test --grep @claim:best-result",
+    "sandbox": "fresh browser context at /play?test=1; finish the real eight-lap run, assert the stored score and build, reload, and assert the record is unchanged"
+  },
+  {
+    "id": "frame-rate",
+    "claim": "The game maintains 60 fps on a mid-range phone, measured at 390px in the browser test.",
+    "where": "README",
+    "test": "npx playwright test --grep @claim:frame-rate",
+    "sandbox": "fresh 390px browser context at /demo; record 180 requestAnimationFrame intervals and assert 14–18 ms mean with p95 at or below 22 ms"
+  },
+  {
     "id": "local-privacy",
     "claim": "The game has no account, ads, analytics, or personal-data requests.",
     "where": "landing facts, privacy page, README",

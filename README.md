@@ -13,6 +13,7 @@ Play the isolated sample at `/demo` or `https://last-lap-breakout.sociobot.in/de
 - Pause with P or the Pause run button.
 - Choose modifiers with keys 1–3 or their buttons.
 - Turn on assist mode for a wider paddle, slower orb, and one more hull point.
+- In Game settings, choose J/L or H/K as extra paddle keys and Escape as the pause key.
 
 ## Run locally
 
@@ -32,11 +33,11 @@ npm test
 npm run build
 ```
 
-The test suite covers deterministic simulation, the full eight-lap result path, keyboard and touch input, demo isolation, local recovery, privacy, mobile layout, routes, and accessibility. The production build lands in `dist/` with `index.html` at its root.
+The test suite covers deterministic simulation, the full eight-lap result path, best-result reload persistence, keyboard and touch input, remapped keys, demo isolation, local recovery, privacy, frame cadence, mobile layout, routes, and accessibility. The production build lands in `dist/` with `index.html` and `404.html` at its root.
 
 ## Data and privacy
 
-The app has no account, analytics, ads, or third-party runtime requests. A real run and its settings use local storage. The demo uses separate `demo:` session storage keys for both progress and settings. The game reloads offline after the first visit. See `/privacy` and [.factory/demo.md](.factory/demo.md) for details.
+The app has no account, analytics, ads, or third-party runtime requests. A real run, its settings, and the highest completed result use local storage. The demo uses separate `demo:` session storage keys for both progress and settings and never saves a best result. The game reloads offline after the first visit. The 390px browser measurement records a 60 fps frame cadence. See `/privacy` and [.factory/demo.md](.factory/demo.md) for details.
 
 ## Deployment
 

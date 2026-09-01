@@ -5,12 +5,15 @@
       "headers": { "Cache-Control": "public, max-age=31536000, immutable" }
     }
   ],
-  "navigationFallback": {
-    "rewrite": "/index.html",
-    "exclude": ["/assets/*", "/*.svg", "/*.png", "/*.jpg", "/*.xml", "/*.txt", "/sw.js"]
-  },
+  "routes": [
+    { "route": "/", "rewrite": "/index.html" },
+    { "route": "/demo", "rewrite": "/index.html" },
+    { "route": "/play", "rewrite": "/index.html" },
+    { "route": "/privacy", "rewrite": "/index.html" },
+    { "route": "/terms", "rewrite": "/index.html" }
+  ],
   "responseOverrides": {
-    "404": { "rewrite": "/index.html" }
+    "404": { "rewrite": "/404.html" }
   },
   "globalHeaders": {
     "Content-Security-Policy": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; media-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",

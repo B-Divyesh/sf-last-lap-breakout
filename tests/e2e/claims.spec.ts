@@ -74,6 +74,43 @@ test('@claim:local-recovery progress and settings survive reload', async ({ page
   await expect(page.getByLabel('Mute sound')).toBeChecked();
 });
 
+test('@claim:best-result a completed real run saves its best result through reload', async ({ page }) => {
+  await page.goto('/play?test=1');
+  for (let lap = 1; lap < 8; lap++) {
+    await expect(page.getByRole('heading', { name: 'Choose one modifier' })).toBeVisible();
+    await page.locator('[data-perk]').first().click();
+  }
+  await expect(page.getByRole('heading', { name: 'Run complete' })).toBeVisible();
+  const shownScore = await page.locator('.result-score').textContent();
+  const shownBuild = await page.getByLabel('Build string').inputValue();
+  await expect(page.locator('[data-best-result]')).toContainText('Best result saved');
+  const beforeReload = await page.evaluate(() => localStorage.getItem('last-lap-breakout:best:v1'));
+  expect(beforeReload).toBeTruthy();
+  expect(JSON.parse(beforeReload!)).toEqual({ score: Number(shownScore?.replace(/\D/g, '')), build: shownBuild, completed: true });
+  await page.reload();
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('last-lap-breakout:best:v1'))).toBe(beforeReload);
+});
+
+test('@claim:frame-rate the 390px game maintains a 60 fps frame cadence', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/demo');
+  const intervals = await page.evaluate(() => new Promise<number[]>(resolve => {
+    const times: number[] = [];
+    const sample = (time: number): void => {
+      times.push(time);
+      if (times.length === 181) resolve(times.slice(1).map((value, index) => value - times[index]));
+      else requestAnimationFrame(sample);
+    };
+    requestAnimationFrame(sample);
+  }));
+  const average = intervals.reduce((total, value) => total + value, 0) / intervals.length;
+  const sorted = [...intervals].sort((a, b) => a - b);
+  const p95 = sorted[Math.floor(sorted.length * 0.95)];
+  expect(average).toBeGreaterThanOrEqual(14);
+  expect(average).toBeLessThanOrEqual(18);
+  expect(p95).toBeLessThanOrEqual(22);
+});
+
 test('@claim:local-privacy the demo sends requests only to this site', async ({ page }) => {
   const origins = new Set<string>();
   page.on('request', request => origins.add(new URL(request.url()).origin));
@@ -117,6 +154,44 @@ test('history routes, metadata, and the mobile layout work', async ({ page }) =>
   const canvasBox = await page.locator('#preview-game canvas').boundingBox();
   expect(canvasBox).not.toBeNull();
   expect(canvasBox!.y + canvasBox!.height).toBeLessThanOrEqual(844);
+  const demoAction = await page.getByRole('link', { name: 'Try it with sample data' }).boundingBox();
+  expect(demoAction).not.toBeNull();
+  expect(demoAction!.y + demoAction!.height).toBeLessThanOrEqual(844);
+  for (const target of await page.locator('.site-header .wordmark, .site-header nav a:visible, .site-footer a').all()) {
+    const box = await target.boundingBox();
+    expect(box?.width).toBeGreaterThanOrEqual(44);
+    expect(box?.height).toBeGreaterThanOrEqual(44);
+  }
+  await page.goto('/demo');
+  for (const target of await page.locator('.demo-banner button, .demo-banner a').all()) {
+    const box = await target.boundingBox();
+    expect(box?.width).toBeGreaterThanOrEqual(44);
+    expect(box?.height).toBeGreaterThanOrEqual(44);
+  }
+});
+
+test('rejects a structurally incomplete saved run and supports remapped keys', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.addInitScript(() => localStorage.setItem('last-lap-breakout:v1', JSON.stringify({ lap: 1, bricks: [] })));
+  await page.goto('/play');
+  await expect(page.locator('[data-lap]')).toHaveText('1 / 8');
+  await page.getByRole('button', { name: 'Game settings' }).click();
+  await page.getByLabel('Left movement').selectOption('j');
+  await page.getByRole('button', { name: 'Save settings' }).click();
+  const canvas = page.locator('canvas');
+  await canvas.focus();
+  const start = Number(await canvas.getAttribute('data-paddle'));
+  await page.keyboard.down('j'); await page.waitForTimeout(180); await page.keyboard.up('j');
+  expect(Number(await canvas.getAttribute('data-paddle'))).toBeLessThan(start);
+  expect(errors).toEqual([]);
+});
+
+test('the standalone not-found document has the designed 404 page', async ({ page }) => {
+  const response = await page.goto('/404.html');
+  expect(response?.status()).toBe(200);
+  await expect(page).toHaveTitle('Page not found — Last Lap Breakout');
+  await expect(page.getByRole('heading', { name: 'This lap does not exist' })).toBeVisible();
 });
 
 test('production pages load without console or page errors', async ({ page }) => {

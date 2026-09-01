@@ -4,30 +4,78 @@ const REAL_KEY = 'last-lap-breakout:v1';
 const DEMO_KEY = 'demo:last-lap-breakout:v1';
 const SETTINGS_KEY = 'last-lap-breakout:settings:v1';
 const DEMO_SETTINGS_KEY = 'demo:last-lap-breakout:settings:v1';
+const BEST_RESULT_KEY = 'last-lap-breakout:best:v1';
 
-type Settings = { assist: boolean; muted: boolean; shake: boolean };
+type KeyBindings = { left: string; right: string; pause: string };
+type Settings = { assist: boolean; muted: boolean; shake: boolean; keys: KeyBindings };
+type BestResult = { score: number; build: string; completed: true };
 type MountOptions = { demo?: boolean; preview?: boolean; reset?: boolean };
+
+const DEFAULT_KEYS: KeyBindings = { left: 'ArrowLeft', right: 'ArrowRight', pause: 'p' };
+const PERK_IDS = new Set(PERKS.map(perk => perk.id));
+const STATUSES = new Set<RunState['status']>(['playing', 'paused', 'draft', 'won', 'lost']);
 
 function settingsStorage(demo: boolean): Storage { return demo ? sessionStorage : localStorage; }
 
 function settingsKey(demo: boolean): string { return demo ? DEMO_SETTINGS_KEY : SETTINGS_KEY; }
 
 function readSettings(demo = false): Settings {
-  try { return { assist: false, muted: false, shake: true, ...JSON.parse(settingsStorage(demo).getItem(settingsKey(demo)) || '{}') }; }
-  catch { return { assist: false, muted: false, shake: true }; }
+  const fallback = { assist: false, muted: false, shake: true, keys: { ...DEFAULT_KEYS } };
+  try {
+    const saved = JSON.parse(settingsStorage(demo).getItem(settingsKey(demo)) || '{}') as Partial<Settings>;
+    return {
+      assist: typeof saved.assist === 'boolean' ? saved.assist : fallback.assist,
+      muted: typeof saved.muted === 'boolean' ? saved.muted : fallback.muted,
+      shake: typeof saved.shake === 'boolean' ? saved.shake : fallback.shake,
+      keys: {
+        left: typeof saved.keys?.left === 'string' ? saved.keys.left : fallback.keys.left,
+        right: typeof saved.keys?.right === 'string' ? saved.keys.right : fallback.keys.right,
+        pause: typeof saved.keys?.pause === 'string' ? saved.keys.pause : fallback.keys.pause
+      }
+    };
+  } catch { return fallback; }
 }
 
 function saveSettings(settings: Settings, demo = false): void {
   try { settingsStorage(demo).setItem(settingsKey(demo), JSON.stringify(settings)); } catch { /* the game still runs */ }
 }
 
+function isFiniteNumber(value: unknown): value is number { return typeof value === 'number' && Number.isFinite(value); }
+
+function isRunState(value: unknown): value is RunState {
+  if (!value || typeof value !== 'object') return false;
+  const state = value as Record<string, unknown>;
+  const ball = state.ball as Record<string, unknown> | undefined;
+  if (!ball || !Array.isArray(state.bricks) || !Array.isArray(state.perks) || !Array.isArray(state.draft) || !Array.isArray(state.replay)) return false;
+  const validBrick = (brick: unknown): boolean => {
+    if (!brick || typeof brick !== 'object') return false;
+    const item = brick as Record<string, unknown>;
+    return ['x', 'y', 'w', 'h', 'hp', 'maxHp'].every(key => isFiniteNumber(item[key])) &&
+      (item.boss === undefined || typeof item.boss === 'boolean');
+  };
+  const validReplay = (entry: unknown): boolean => Array.isArray(entry) && entry.length === 2 &&
+    Number.isInteger(entry[0]) && Number(entry[0]) >= 0 && [-1, 0, 1].includes(entry[1] as number);
+  return Number.isInteger(state.seed) && Number.isInteger(state.rng) && Number.isInteger(state.lap) && Number(state.lap) >= 1 && Number(state.lap) <= TOTAL_LAPS &&
+    isFiniteNumber(state.lapTime) && Number(state.lapTime) >= 0 && Number(state.lapTime) <= LAP_SECONDS &&
+    isFiniteNumber(state.elapsed) && Number(state.elapsed) >= 0 && isFiniteNumber(state.score) && Number(state.score) >= 0 &&
+    Number.isInteger(state.hull) && Number(state.hull) >= 0 && Number(state.hull) <= 5 && typeof state.status === 'string' && STATUSES.has(state.status as RunState['status']) &&
+    isFiniteNumber(state.paddleX) && Number(state.paddleX) >= 0 && Number(state.paddleX) <= 1 &&
+    ['x', 'y', 'vx', 'vy', 'r'].every(key => isFiniteNumber(ball[key])) && Number(ball.r) > 0 &&
+    state.bricks.every(validBrick) && state.perks.every(id => typeof id === 'string' && PERK_IDS.has(id as RunState['perks'][number])) &&
+    state.draft.every(id => typeof id === 'string' && PERK_IDS.has(id as RunState['draft'][number])) &&
+    Number.isInteger(state.hits) && Number(state.hits) >= 0 && typeof state.assist === 'boolean' &&
+    Number.isInteger(state.tick) && Number(state.tick) >= 0 && state.replay.every(validReplay) && [-1, 0, 1].includes(state.lastInput as number);
+}
+
 function readRun(key: string, demo: boolean): RunState | null {
   try {
     const raw = (demo ? sessionStorage : localStorage).getItem(key);
     if (!raw) return null;
-    const state = JSON.parse(raw) as RunState;
+    const state = JSON.parse(raw) as Partial<RunState>;
+    // These fields were added in v1 and can be reconstructed for complete
+    // older records. Every other field must be present before mounting.
     state.tick ??= 0; state.replay ??= []; state.lastInput ??= 0;
-    return state.lap >= 1 && state.lap <= TOTAL_LAPS && Array.isArray(state.bricks) ? state : null;
+    return isRunState(state) ? state : null;
   } catch { return null; }
 }
 
@@ -37,6 +85,22 @@ function saveRun(key: string, state: RunState, demo: boolean): void {
 
 function eraseRun(key: string, demo: boolean): void {
   try { (demo ? sessionStorage : localStorage).removeItem(key); } catch { /* non-fatal */ }
+}
+
+function readBestResult(): BestResult | null {
+  try {
+    const value = JSON.parse(localStorage.getItem(BEST_RESULT_KEY) || 'null') as Partial<BestResult> | null;
+    return value && value.completed === true && isFiniteNumber(value.score) && value.score >= 0 && typeof value.build === 'string' ? value as BestResult : null;
+  } catch { return null; }
+}
+
+function saveBestResult(state: RunState): void {
+  if (state.status !== 'won') return;
+  try {
+    const next: BestResult = { score: state.score, build: buildString(state), completed: true };
+    const previous = readBestResult();
+    if (!previous || next.score >= previous.score) localStorage.setItem(BEST_RESULT_KEY, JSON.stringify(next));
+  } catch { /* a full or unavailable store must not prevent the end screen */ }
 }
 
 export function resetDemo(): void {
@@ -50,7 +114,7 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
   const storageKey = demo ? DEMO_KEY : REAL_KEY;
   // The landing preview is stateless: it does not inspect real settings just
   // to animate the board.
-  const settings = preview ? { assist: false, muted: false, shake: true } : readSettings(demo);
+  const settings = preview ? { assist: false, muted: false, shake: true, keys: { ...DEFAULT_KEYS } } : readSettings(demo);
   if (options.reset) eraseRun(storageKey, demo);
   let state = preview ? createRun(0x8badf00d, false) : readRun(storageKey, demo) || createRun(demo ? 0x1a57d3a0 : Date.now(), settings.assist);
   if (!preview && state.status === 'paused') state.status = 'playing';
@@ -143,7 +207,10 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
     } else {
       const won = state.status === 'won';
       const share = buildString(state);
-      overlay.innerHTML = `<div class="overlay-panel result-panel"><p class="eyebrow">${won ? 'Eight laps complete' : `Run ended on lap ${state.lap}`}</p><h2>${won ? 'Run complete' : 'Hull depleted'}</h2><p class="result-score">${state.score.toLocaleString()} points</p><label for="build-code">Build string</label><input id="build-code" readonly value="${share}" /><div class="result-actions"><button class="button" type="button" data-copy>Copy build string</button><button class="button button-quiet" type="button" data-restart>Start another run</button></div><p data-copy-status aria-live="polite"></p></div>`;
+      if (!demo && won) saveBestResult(state);
+      const best = !demo ? readBestResult() : null;
+      const bestText = best ? `<p class="best-result" data-best-result>Best result saved: ${best.score.toLocaleString()} points</p>` : '';
+      overlay.innerHTML = `<div class="overlay-panel result-panel"><p class="eyebrow">${won ? 'Eight laps complete' : `Run ended on lap ${state.lap}`}</p><h2>${won ? 'Run complete' : 'Hull depleted'}</h2><p class="result-score">${state.score.toLocaleString()} points</p>${bestText}<label for="build-code">Build string</label><input id="build-code" readonly value="${share}" /><div class="result-actions"><button class="button" type="button" data-copy>Copy build string</button><button class="button button-quiet" type="button" data-restart>Start another run</button></div><p data-copy-status aria-live="polite"></p></div>`;
       status.textContent = won ? `Run complete with ${state.score} points.` : `Run ended on lap ${state.lap}.`;
       eraseRun(storageKey, demo);
     }
@@ -224,16 +291,17 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
 
   function onKey(event: KeyboardEvent): void {
     userActivated = true;
-    if (event.key === 'ArrowLeft' || event.key.toLowerCase() === 'a') { direction = -1; event.preventDefault(); }
-    if (event.key === 'ArrowRight' || event.key.toLowerCase() === 'd') { direction = 1; event.preventDefault(); }
-    if (!preview && event.key.toLowerCase() === 'p') { setPaused(state.status !== 'paused'); event.preventDefault(); }
+    const key = event.key.toLowerCase();
+    if (event.key === 'ArrowLeft' || key === 'a' || key === settings.keys.left.toLowerCase()) { direction = -1; event.preventDefault(); }
+    if (event.key === 'ArrowRight' || key === 'd' || key === settings.keys.right.toLowerCase()) { direction = 1; event.preventDefault(); }
+    if (!preview && key === settings.keys.pause.toLowerCase()) { setPaused(state.status !== 'paused'); event.preventDefault(); }
     if (state.status === 'paused' && (event.key === 'Enter' || event.key === ' ')) setPaused(false);
     if (state.status === 'draft' && ['1', '2', '3'].includes(event.key)) {
       choosePerk(state, state.draft[Number(event.key) - 1]); tone(440, 0.08); showOverlay();
     }
   }
   function onKeyUp(event: KeyboardEvent): void {
-    if (['ArrowLeft', 'ArrowRight', 'a', 'd', 'A', 'D'].includes(event.key)) direction = 0;
+    if (['ArrowLeft', 'ArrowRight', 'a', 'd', 'A', 'D', settings.keys.left, settings.keys.right].includes(event.key)) direction = 0;
   }
   function onVisibility(): void { if (document.hidden && state.status === 'playing' && !preview) setPaused(true); }
   function onPointer(event: PointerEvent): void {
@@ -288,9 +356,13 @@ export function wireSettings(dialog: HTMLDialogElement, demo = false): void {
   const assist = dialog.querySelector<HTMLInputElement>('[name="assist"]')!;
   const muted = dialog.querySelector<HTMLInputElement>('[name="muted"]')!;
   const shake = dialog.querySelector<HTMLInputElement>('[name="shake"]')!;
+  const left = dialog.querySelector<HTMLSelectElement>('[name="left-key"]')!;
+  const right = dialog.querySelector<HTMLSelectElement>('[name="right-key"]')!;
+  const pause = dialog.querySelector<HTMLSelectElement>('[name="pause-key"]')!;
   assist.checked = settings.assist; muted.checked = settings.muted; shake.checked = settings.shake;
+  left.value = settings.keys.left; right.value = settings.keys.right; pause.value = settings.keys.pause;
   dialog.addEventListener('change', () => {
-    const next = { assist: assist.checked, muted: muted.checked, shake: shake.checked };
+    const next = { assist: assist.checked, muted: muted.checked, shake: shake.checked, keys: { left: left.value, right: right.value, pause: pause.value } };
     saveSettings(next, demo);
     document.dispatchEvent(new CustomEvent('llb-settings', { detail: next }));
   });

@@ -35,6 +35,12 @@ function settingsDialog(): string {
       <label class="switch-row"><span><strong>Assist mode</strong><small>Wider paddle, slower orb, and one more hull point. Starts next run.</small></span><input type="checkbox" name="assist" /></label>
       <label class="switch-row"><span><strong>Mute sound</strong><small>Stops hit tones. Sound starts only after you play.</small></span><input type="checkbox" name="muted" /></label>
       <label class="switch-row"><span><strong>Screen movement</strong><small>Allows short movement on impacts. Reduced-motion settings override this.</small></span><input type="checkbox" name="shake" /></label>
+      <fieldset class="key-bindings"><legend>Keyboard mapping</legend>
+        <p>Choose extra keys for movement and pause. Arrow keys and A/D remain available.</p>
+        <label>Left movement <select name="left-key"><option value="ArrowLeft">Left Arrow</option><option value="j">J</option><option value="h">H</option></select></label>
+        <label>Right movement <select name="right-key"><option value="ArrowRight">Right Arrow</option><option value="l">L</option><option value="k">K</option></select></label>
+        <label>Pause run <select name="pause-key"><option value="p">P</option><option value="Escape">Escape</option></select></label>
+      </fieldset>
       <button class="button" type="button" data-close>Save settings</button>
     </form>
   </dialog>`;
@@ -93,7 +99,7 @@ function gamePage(demo: boolean): string {
 }
 
 function privacyPage(): string {
-  return `${header()}<main id="main" class="text-page"><p class="eyebrow">Privacy</p><h1 tabindex="-1">Your game stays in this browser</h1><p>Last Lap Breakout has no account and sends no personal data.</p><h2>What this browser stores</h2><p>The game stores your current run, settings, and best result in local storage. Demo runs and settings use separate session storage keys.</p><h2>What leaves your device</h2><p>The static site makes no analytics or advertising requests. Your browser only requests game files from this site.</p><h2>Delete your data</h2><p>Clear this site's browser storage to remove every saved run and setting.</p><p>Effective: September 1, 2026.</p></main>${footer()}`;
+  return `${header()}<main id="main" class="text-page"><p class="eyebrow">Privacy</p><h1 tabindex="-1">Your game stays in this browser</h1><p>Last Lap Breakout has no account and sends no personal data.</p><h2>What this browser stores</h2><p>A real run stores its current state, settings, and highest completed score in local storage. Demo runs and settings use separate session storage keys.</p><h2>What leaves your device</h2><p>The static site makes no analytics or advertising requests. Your browser only requests game files from this site.</p><h2>Delete your data</h2><p>Clear this site's browser storage to remove every saved run, setting, and best result.</p><p>Effective: September 1, 2026.</p></main>${footer()}`;
 }
 
 function termsPage(): string {

@@ -1,4 +1,4 @@
-const CACHE = 'last-lap-breakout-v2';
+const CACHE = 'last-lap-breakout-v3';
 const SHELL = ['/', '/index.html', '/favicon.svg', '/assets/orbital-breakout.webp', '/assets/share-card.jpg', '/assets/silkscreen.ttf'];
 
 self.addEventListener('install', event => {

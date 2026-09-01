@@ -19,7 +19,7 @@ The direction is deliberately single-mode. A light theme would break the dark-co
 
 ## Type and spacing
 
-Display text uses the self-hosted OFL font Silkscreen, chosen for square counters and legible pixel forms. Body and controls use the system sans stack for speed and clear small-screen reading. The scale is 14 / 16 / 20 / 28 / 48 px. Layout follows an 8 px base with 4 px micro-gaps, 16 px control groups, 32 px section gaps, and 64 px landing sections.
+Display text uses the self-hosted OFL font Silkscreen, chosen for square counters and legible pixel forms. Body and controls use the system sans stack for speed and clear small-screen reading. The scale is 14 / 16 / 20 / 28 / 48 px. Layout follows an 8 px base with 4 px micro-gaps, 16 px control groups, 32 px section gaps, and 64 px landing sections. Every header, footer, and demo action keeps a 44 px touch target; the phone headline is compact enough to retain both the live board and sample-run action in the cold viewport.
 
 ## Shape and interaction grammar
 
@@ -27,7 +27,7 @@ Panels have clipped upper-right corners, two-pixel rails, and hard four-pixel sh
 
 ## Motion policy
 
-The signature motion is a slow horizontal star drift behind the live canvas. Interface transitions last 180 ms and move no more than eight pixels. Screen shake is off in reduced-motion mode and can always be disabled. With `prefers-reduced-motion: reduce`, star drift stops, transitions become immediate, and screen shake is disabled.
+The signature motion is a slow horizontal star drift behind the live canvas. Interface transitions last 180 ms and move no more than eight pixels. Screen shake is off in reduced-motion mode and can always be disabled. With `prefers-reduced-motion: reduce`, star drift stops, transitions become immediate, and screen shake is disabled. Players can map extra J/L or H/K movement keys and Escape pause in Game settings; arrows and A/D remain available.
 
 ## Game feel and difficulty
 

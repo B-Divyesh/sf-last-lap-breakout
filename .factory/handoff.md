@@ -30,7 +30,7 @@ Measured against the production preview on 2026-09-01:
 - Lighthouse lab LCP: 1.4 s. CLS: 0. Total blocking time: 0 ms.
 - Worker `verify-url.sh`: HTTP 200, 580 ms network-idle load, one h1, one main, no missing alt text, no unlabeled buttons, and no console errors.
 - 390 × 844 headless Chromium run: 60.0 fps over 180 frames; p95 frame time 16.7 ms.
-- Initial compiled JS: 22.9 KB raw / 8.8 KB gzip. CSS: 14.6 KB raw / 4.1 KB gzip. Display font: 32 KB. Hero AVIF: 33 KB; WebP fallback: 49 KB.
+- Initial compiled JS: 23.6 KB raw / 9.0 KB gzip. CSS: 14.8 KB raw / 4.2 KB gzip. Display font: 32 KB. Hero AVIF: 33 KB; WebP fallback: 49 KB.
 - `npm audit`: zero known vulnerabilities.
 - Desktop 1440 × 1000 and mobile 390 × 844 captures were reviewed. The game is visible on the first screen and neither layout overflows horizontally.
 

@@ -2,7 +2,7 @@
 
 ## Direction and purpose
 
-Last Lap Breakout uses a pixel/demoscene cockpit. A dark orbital track, scanline texture, sharp pixel corners, and a limited phosphor palette make the eight-lap structure feel like a finite arcade cartridge rather than an endless web game. The game canvas is the hero and the controls sit beside it, so the first screen shows play instead of a menu wall.
+Last Lap Breakout uses a pixel/demoscene cockpit. A dark orbital track, scanline texture, sharp pixel corners, and a limited phosphor palette make the eight-lap structure feel like a finite arcade cartridge rather than an endless web game. The game canvas is the hero and the controls sit beside it; at phone widths the compact live board deliberately precedes the landing copy so a cold first viewport shows play instead of a menu wall.
 
 ## Palette
 

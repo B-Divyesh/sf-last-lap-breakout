@@ -1,25 +1,49 @@
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 
-test('@claim:finite-run a seeded run reaches the eighth-lap result', async ({ page }) => {
-  await page.goto('/demo?test=1');
+test('@claim:finite-run a title-screen sample reaches the eighth-lap result', async ({ page }) => {
+  await page.goto('/?test=1');
+  await page.getByRole('link', { name: 'Try it with sample data' }).click();
+  await expect(page).toHaveURL(/\/demo\?test=1$/);
   for (let lap = 1; lap < 8; lap++) {
     await expect(page.getByRole('heading', { name: 'Choose one modifier' })).toBeVisible();
     await page.locator('[data-perk]').first().click();
   }
   await expect(page.getByRole('heading', { name: 'Run complete' })).toBeVisible();
-  await expect(page.getByLabel('Build string')).toHaveValue(/^LLB-/);
+  await expect(page.getByLabel('Build string')).toHaveValue('LLB-7B4T5S-CEBQHDW-0SBRZTA');
 });
 
 test('@claim:demo-sandbox demo is marked and uses a separate namespace', async ({ page }) => {
   await page.goto('/demo');
+  await page.evaluate(() => localStorage.setItem('last-lap-breakout:settings:v1', JSON.stringify({ assist: true, muted: true, shake: false })));
+  await page.reload();
   await expect(page.getByText('Demo — sample data, nothing is saved')).toBeVisible();
+  await page.getByRole('button', { name: 'Game settings' }).click();
+  await expect(page.getByLabel('Mute sound')).not.toBeChecked();
+  await page.getByLabel('Mute sound').check();
+  await page.getByRole('button', { name: 'Save settings' }).click();
   await page.waitForTimeout(1100);
-  const keys = await page.evaluate(() => ({ local: Object.keys(localStorage), session: Object.keys(sessionStorage) }));
-  expect(keys.session).toContain('demo:last-lap-breakout:v1');
-  expect(keys.local).not.toContain('last-lap-breakout:v1');
+  const storage = await page.evaluate(() => ({
+    local: Object.fromEntries(Object.entries(localStorage)),
+    session: Object.fromEntries(Object.entries(sessionStorage))
+  }));
+  expect(storage.session).toHaveProperty('demo:last-lap-breakout:v1');
+  expect(storage.session).toHaveProperty('demo:last-lap-breakout:settings:v1');
+  expect(storage.local).toEqual({ 'last-lap-breakout:settings:v1': JSON.stringify({ assist: true, muted: true, shake: false }) });
   await page.getByRole('button', { name: 'Reset demo' }).click();
   await expect(page.getByText('Demo — sample data, nothing is saved')).toBeVisible();
+  await expect.poll(() => page.evaluate(() => ({
+    settings: sessionStorage.getItem('demo:last-lap-breakout:settings:v1'),
+    run: JSON.parse(sessionStorage.getItem('demo:last-lap-breakout:v1') || '{}').seed
+  }))).toEqual({ settings: null, run: 0x1a57d3a0 });
+});
+
+test('a deterministic loss reaches its end screen and restart resets the run', async ({ page }) => {
+  await page.goto('/play?test=loss');
+  await expect(page.getByRole('heading', { name: 'Hull depleted' })).toBeVisible();
+  await page.getByRole('button', { name: 'Start another run' }).click();
+  await expect(page.locator('[data-lap]')).toHaveText('1 / 8');
+  await expect(page.getByRole('heading', { name: 'Hull depleted' })).not.toBeVisible();
 });
 
 test('@claim:input-parity keyboard and touch controls move the paddle', async ({ page }) => {
@@ -90,6 +114,9 @@ test('history routes, metadata, and the mobile layout work', async ({ page }) =>
   await page.goBack();
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Finish a Breakout run in eight minutes');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  const canvasBox = await page.locator('#preview-game canvas').boundingBox();
+  expect(canvasBox).not.toBeNull();
+  expect(canvasBox!.y + canvasBox!.height).toBeLessThanOrEqual(844);
 });
 
 test('production pages load without console or page errors', async ({ page }) => {

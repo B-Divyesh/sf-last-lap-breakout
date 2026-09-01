@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildString, choosePerk, createRun, LAP_SECONDS, makeBricks, runHash, stepRun, TOTAL_LAPS } from '../src/game/core';
+import { buildString, choosePerk, createRun, LAP_SECONDS, makeBricks, runHash, STEP, stepRun, TOTAL_LAPS } from '../src/game/core';
 
 describe('deterministic run core', () => {
   it('starts with the fixed session shape', () => {
@@ -37,6 +37,17 @@ describe('deterministic run core', () => {
     const bricks = makeBricks(8);
     expect(bricks.filter(brick => brick.boss)).toHaveLength(1);
     expect(bricks.find(brick => brick.boss)?.hp).toBe(12);
+  });
+
+  it('ends a run after the fourth missed orb', () => {
+    const run = createRun(1234);
+    for (let miss = 0; miss < 4; miss++) {
+      run.ball.y = 1.02;
+      run.ball.vy = 0.4;
+      stepRun(run, STEP, 0);
+    }
+    expect(run.hull).toBe(0);
+    expect(run.status).toBe('lost');
   });
 
   it('creates stable hashes and different build paths', () => {

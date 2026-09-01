@@ -8,10 +8,10 @@
   },
   {
     "id": "demo-sandbox",
-    "claim": "The sample run is separate and does not save real progress.",
+    "claim": "The sample run is separate and does not save real progress or settings.",
     "where": "landing action, demo banner, README",
     "test": "npx playwright test --grep @claim:demo-sandbox",
-    "sandbox": "fresh browser context at /demo; assert only the demo-prefixed session storage key is written"
+    "sandbox": "fresh browser context at /demo; preload real settings, change demo settings, and assert only demo-prefixed session keys are read or written"
   },
   {
     "id": "input-parity",

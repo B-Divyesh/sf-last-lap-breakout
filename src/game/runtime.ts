@@ -3,17 +3,22 @@ import { buildString, choosePerk, createRun, LAP_SECONDS, PERKS, RunState, STEP,
 const REAL_KEY = 'last-lap-breakout:v1';
 const DEMO_KEY = 'demo:last-lap-breakout:v1';
 const SETTINGS_KEY = 'last-lap-breakout:settings:v1';
+const DEMO_SETTINGS_KEY = 'demo:last-lap-breakout:settings:v1';
 
 type Settings = { assist: boolean; muted: boolean; shake: boolean };
 type MountOptions = { demo?: boolean; preview?: boolean; reset?: boolean };
 
-function readSettings(): Settings {
-  try { return { assist: false, muted: false, shake: true, ...JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}') }; }
+function settingsStorage(demo: boolean): Storage { return demo ? sessionStorage : localStorage; }
+
+function settingsKey(demo: boolean): string { return demo ? DEMO_SETTINGS_KEY : SETTINGS_KEY; }
+
+function readSettings(demo = false): Settings {
+  try { return { assist: false, muted: false, shake: true, ...JSON.parse(settingsStorage(demo).getItem(settingsKey(demo)) || '{}') }; }
   catch { return { assist: false, muted: false, shake: true }; }
 }
 
-function saveSettings(settings: Settings): void {
-  try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch { /* the game still runs */ }
+function saveSettings(settings: Settings, demo = false): void {
+  try { settingsStorage(demo).setItem(settingsKey(demo), JSON.stringify(settings)); } catch { /* the game still runs */ }
 }
 
 function readRun(key: string, demo: boolean): RunState | null {
@@ -34,13 +39,18 @@ function eraseRun(key: string, demo: boolean): void {
   try { (demo ? sessionStorage : localStorage).removeItem(key); } catch { /* non-fatal */ }
 }
 
-export function resetDemo(): void { eraseRun(DEMO_KEY, true); }
+export function resetDemo(): void {
+  eraseRun(DEMO_KEY, true);
+  try { sessionStorage.removeItem(DEMO_SETTINGS_KEY); } catch { /* the game still runs */ }
+}
 
 export function mountGame(host: HTMLElement, options: MountOptions = {}): () => void {
   const demo = Boolean(options.demo);
   const preview = Boolean(options.preview);
   const storageKey = demo ? DEMO_KEY : REAL_KEY;
-  const settings = readSettings();
+  // The landing preview is stateless: it does not inspect real settings just
+  // to animate the board.
+  const settings = preview ? { assist: false, muted: false, shake: true } : readSettings(demo);
   if (options.reset) eraseRun(storageKey, demo);
   let state = preview ? createRun(0x8badf00d, false) : readRun(storageKey, demo) || createRun(demo ? 0x1a57d3a0 : Date.now(), settings.assist);
   if (!preview && state.status === 'paused') state.status = 'playing';
@@ -54,8 +64,11 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
   let lastHits = state.hits;
   let overlayKey = '';
   let userActivated = false;
-  const isLocalTest = ['127.0.0.1', 'localhost'].includes(location.hostname) && new URLSearchParams(location.search).has('test');
-  const testSpeed = isLocalTest ? 1200 : 1;
+  const testParams = new URLSearchParams(location.search);
+  const isLocalTest = ['127.0.0.1', 'localhost'].includes(location.hostname) && testParams.has('test');
+  const lossTest = isLocalTest && testParams.get('test') === 'loss';
+  const testSpeed = isLocalTest && !lossTest ? 1200 : 1;
+  let lossScenarioComplete = false;
 
   host.innerHTML = `
     <section class="game-shell ${preview ? 'game-preview' : ''}" aria-label="Last Lap Breakout game">
@@ -186,7 +199,11 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
       accumulator += delta;
       while (accumulator >= STEP) {
         if (preview) direction = state.ball.x > state.paddleX + 0.015 ? 1 : state.ball.x < state.paddleX - 0.015 ? -1 : 0;
-        stepRun(state, STEP, direction);
+        // This local-only regression route still uses the real fixed-step
+        // core. It simply advances it without paddle input.
+        const lossMultiplier = lossTest && !lossScenarioComplete ? 120 : 1;
+        for (let step = 0; step < lossMultiplier && state.status === 'playing'; step++) stepRun(state, STEP, lossTest ? 0 : direction);
+        if (state.hull <= 0) lossScenarioComplete = true;
         if (testSpeed > 1 && state.status === 'playing') state.lapTime = Math.max(0, state.lapTime - (testSpeed - 1) * STEP);
         accumulator -= STEP;
       }
@@ -266,15 +283,15 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
   };
 }
 
-export function wireSettings(dialog: HTMLDialogElement): void {
-  const settings = readSettings();
+export function wireSettings(dialog: HTMLDialogElement, demo = false): void {
+  const settings = readSettings(demo);
   const assist = dialog.querySelector<HTMLInputElement>('[name="assist"]')!;
   const muted = dialog.querySelector<HTMLInputElement>('[name="muted"]')!;
   const shake = dialog.querySelector<HTMLInputElement>('[name="shake"]')!;
   assist.checked = settings.assist; muted.checked = settings.muted; shake.checked = settings.shake;
   dialog.addEventListener('change', () => {
     const next = { assist: assist.checked, muted: muted.checked, shake: shake.checked };
-    saveSettings(next);
+    saveSettings(next, demo);
     document.dispatchEvent(new CustomEvent('llb-settings', { detail: next }));
   });
   dialog.querySelector<HTMLElement>('[data-close]')?.addEventListener('click', () => dialog.close());

@@ -93,7 +93,7 @@ function gamePage(demo: boolean): string {
 }
 
 function privacyPage(): string {
-  return `${header()}<main id="main" class="text-page"><p class="eyebrow">Privacy</p><h1 tabindex="-1">Your game stays in this browser</h1><p>Last Lap Breakout has no account and sends no personal data.</p><h2>What this browser stores</h2><p>The game stores your current run, settings, and best result in local storage. Demo runs use a separate session storage key.</p><h2>What leaves your device</h2><p>The static site makes no analytics or advertising requests. Your browser only requests game files from this site.</p><h2>Delete your data</h2><p>Clear this site's browser storage to remove every saved run and setting.</p><p>Effective: September 1, 2026.</p></main>${footer()}`;
+  return `${header()}<main id="main" class="text-page"><p class="eyebrow">Privacy</p><h1 tabindex="-1">Your game stays in this browser</h1><p>Last Lap Breakout has no account and sends no personal data.</p><h2>What this browser stores</h2><p>The game stores your current run, settings, and best result in local storage. Demo runs and settings use separate session storage keys.</p><h2>What leaves your device</h2><p>The static site makes no analytics or advertising requests. Your browser only requests game files from this site.</p><h2>Delete your data</h2><p>Clear this site's browser storage to remove every saved run and setting.</p><p>Effective: September 1, 2026.</p></main>${footer()}`;
 }
 
 function termsPage(): string {
@@ -121,9 +121,10 @@ function render(announce = false): void {
   if (path === '/') disposeGame = mountGame(document.querySelector<HTMLElement>('#preview-game')!, { preview: true });
   if (path === '/play' || path === '/demo') {
     disposeGame = mountGame(document.querySelector<HTMLElement>('#game-root')!, { demo: path === '/demo' });
-    const dialog = document.querySelector<HTMLDialogElement>('#settings-dialog'); if (dialog) wireSettings(dialog);
-    document.querySelector('[data-reset-demo]')?.addEventListener('click', () => { resetDemo(); render(); });
-    document.querySelector('[data-real]')?.addEventListener('click', resetDemo);
+    const dialog = document.querySelector<HTMLDialogElement>('#settings-dialog'); if (dialog) wireSettings(dialog, path === '/demo');
+    const discardDemo = () => { disposeGame?.(); disposeGame = undefined; resetDemo(); };
+    document.querySelector('[data-reset-demo]')?.addEventListener('click', () => { discardDemo(); render(); });
+    document.querySelector('[data-real]')?.addEventListener('click', discardDemo);
   }
   document.querySelectorAll<HTMLAnchorElement>('a[data-link]').forEach(link => link.addEventListener('click', navigate));
   if (announce) {
@@ -137,7 +138,9 @@ function navigate(event: MouseEvent): void {
   if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
   const link = event.currentTarget as HTMLAnchorElement;
   if (link.origin !== location.origin || link.hash) return;
-  event.preventDefault(); history.pushState({}, '', link.pathname + link.search); render(true);
+  const keepTestMode = ['127.0.0.1', 'localhost'].includes(location.hostname) && new URLSearchParams(location.search).has('test');
+  const search = keepTestMode && !link.search && (link.pathname === '/demo' || link.pathname === '/play') ? location.search : link.search;
+  event.preventDefault(); history.pushState({}, '', link.pathname + search); render(true);
 }
 
 window.addEventListener('popstate', () => render(true));

@@ -36,7 +36,7 @@ The test suite covers deterministic simulation, the full eight-lap result path, 
 
 ## Data and privacy
 
-The app has no account, analytics, ads, or third-party runtime requests. A real run and its settings use local storage. The demo uses a separate `demo:` session storage key. The game reloads offline after the first visit. See `/privacy` and [.factory/demo.md](.factory/demo.md) for details.
+The app has no account, analytics, ads, or third-party runtime requests. A real run and its settings use local storage. The demo uses separate `demo:` session storage keys for both progress and settings. The game reloads offline after the first visit. See `/privacy` and [.factory/demo.md](.factory/demo.md) for details.
 
 ## Deployment
 

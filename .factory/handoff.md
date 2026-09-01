@@ -1,53 +1,35 @@
 # Last Lap Breakout handoff
 
-## Independent verification status — FAIL (2026-09-01)
+## Repair status — ready for deployment (2026-09-01)
 
-Candidate `454cee762a1832ae01c629a48ed5a21ca7de6579` at `https://last-lap-breakout.sociobot.in` is **not approved for release**. The independent record is in `.factory/verification.md`.
+This repair addresses every release blocker in the independent report for candidate `454cee762a1832ae01c629a48ed5a21ca7de6579`.
 
-Release-blocking findings:
-
-- In `/demo`, saving a game setting writes the real-mode local-storage key `last-lap-breakout:settings:v1`; demo mode must not read or write real-mode storage.
-- At 390 × 844, the cold landing page canvas starts at y=963.6 px, so the captured first screen does not show the game.
-- From a clean installed checkout, the documented `npm test` command passed Vitest and the first two browser tests, then its managed preview became unavailable and seven browser tests returned `ERR_CONNECTION_REFUSED`. Starting `npm run preview` separately allowed all nine browser tests to pass, but the documented quality gate itself still fails.
-
-The deployed JS, CSS, and social-card assets match this candidate's fresh production build. All six declared claim commands passed individually. See the verification record for exact commands, results, additional passing checks, and remediation guidance.
-
-## What shipped
-
-- A complete deterministic Breakout run: eight fixed 60-second laps, seven three-choice modifier drafts, a guarded final core, loss state, result score, deterministic replay hash, and shareable build string.
-- Keyboard, pointer, and touch play. Pause, tab-hide recovery, assist mode, persistent mute, optional screen movement, reduced-motion behavior, synthesized gesture-gated audio, and local run recovery are included.
-- A one-click `/demo` run with a fixed seed, persistent demo banner, reset action, and separate `demo:last-lap-breakout:v1` session storage namespace.
-- Responsive landing, `/play`, `/demo`, `/privacy`, `/terms`, and designed 404 routes. History navigation restores route title and moves focus to the new heading.
-- Original Canvas geometry, favicon, and generated pixel/demoscene orbital artwork. Source prompt, inspection result, and font license are in `assets/src/`.
-- Production metadata, 1200 × 630 social card, sitemap, robots file, strict security headers, SPA fallback, and an offline service worker.
+- Demo settings now use `sessionStorage` key `demo:last-lap-breakout:settings:v1`. `/demo` neither reads nor writes `last-lap-breakout:settings:v1`; reset clears only demo progress and settings.
+- At 390 × 844, the live canvas is ordered before landing copy and its complete bounding box fits inside the cold viewport. Desktop layout is unchanged.
+- `npm test` owns exactly one strict-port production preview for the whole Playwright suite. It never attaches to an existing server, and the preview command builds the current production bundle before it starts.
+- Browser regressions now start from the title action, assert the deterministic end build `LLB-7B4T5S-CEBQHDW-0SBRZTA`, exercise a natural fixed-step loss, restart it, preload real demo settings to prove they are ignored, and save demo settings to prove only the demo namespace changes.
 
 ## Run and verify
 
 ```sh
-npm install
+npm ci
 npm test
 npm run build
-npm run preview
 ```
 
-The browser suite contains 5 deterministic core tests and 9 Chromium tests. Independent verification found that `npm test` does not reliably keep its managed preview available; see the FAIL status above. With a separately held production preview, all 14 tests passed. The suite covers every entry in `.factory/claims.json`, a full accelerated eight-lap result, keyboard/touch input, settings and run recovery, demo isolation, offline reload, same-origin-only requests, WCAG A/AA automated checks, metadata, mobile overflow, routing, 404, and console errors.
+`npm test` runs 6 Vitest core tests and 10 Chromium browser tests. Playwright builds and starts one managed `127.0.0.1:4173` production preview, then stops it after the complete suite. The suite covers all six declared claims, title-to-result, loss/restart, keyboard and touch input, settings and run recovery, demo isolation, offline reload, same-origin-only requests, WCAG 2 A/AA serious/critical findings, 390 px mobile layout, routes, 404, and console/page errors.
 
-The exact deploy command is `npm run build`. Output is in `dist/`, with `dist/index.html` at its root.
+Production output is `dist/`; deploy the static contents with `public/staticwebapp.config.json` included by Vite.
 
-## Measured quality
+## Verification evidence
 
-Measured against the production preview on 2026-09-01:
+- `npm ci` completed with 0 vulnerabilities.
+- `npm test` passed on 2026-09-01: 6/6 core tests and 10/10 Chromium tests, including all claim tags.
+- `npm run build` passed; emitted initial JS is 24.20 KB raw / 9.17 KB gzip and CSS is 14.89 KB raw / 4.20 KB gzip.
+- The browser accessibility test runs Axe WCAG 2 A/AA against `/`, `/demo`, `/privacy`, and `/terms` with zero serious or critical violations. Console/page-error, reduced-motion, offline, privacy, desktop, mobile, keyboard, and touch paths are covered in the same production-preview suite.
+- The mobile regression reads the actual preview-canvas bounding box at 390 × 844 and requires its bottom edge to be at or above 844 px; it also checks no horizontal overflow.
 
-- Lighthouse mobile: Performance 100, Accessibility 100, Best Practices 100, SEO 100.
-- Lighthouse lab LCP: 1.4 s. CLS: 0. Total blocking time: 0 ms.
-- Worker `verify-url.sh`: HTTP 200, 580 ms network-idle load, one h1, one main, no missing alt text, no unlabeled buttons, and no console errors.
-- 390 × 844 headless Chromium run: 60.0 fps over 180 frames; p95 frame time 16.7 ms.
-- Initial compiled JS: 23.6 KB raw / 9.0 KB gzip. CSS: 14.8 KB raw / 4.2 KB gzip. Display font: 32 KB. Hero AVIF: 33 KB; WebP fallback: 49 KB.
-- `npm audit`: zero known vulnerabilities.
-- Desktop 1440 × 1000 and mobile 390 × 844 captures were reviewed. The game is visible on the first screen and neither layout overflows horizontally.
+## Known gaps
 
-## Known gaps and next steps
-
-- Balance is deterministic and test-covered, but the success measure needs human play sessions. No player telemetry was added because the product is local-first and has no analytics.
-- The replay hash covers the seed, build, result, and compact tick-stamped input-change log. It does not provide a visual replay viewer.
-- A future release can add alternate challenge sets only after real completion and replay behavior is measured. The v1 has no payment code.
+- Game balance has deterministic coverage but still needs voluntary human play sessions. No telemetry is collected because the game is local-first.
+- Replay hashes are deterministic compact records, not a visual replay viewer.

@@ -28,6 +28,14 @@ Production output is `dist/`; deploy the static contents with `public/staticweba
 - `npm run build` passed; emitted initial JS is 24.20 KB raw / 9.17 KB gzip and CSS is 14.89 KB raw / 4.20 KB gzip.
 - The browser accessibility test runs Axe WCAG 2 A/AA against `/`, `/demo`, `/privacy`, and `/terms` with zero serious or critical violations. Console/page-error, reduced-motion, offline, privacy, desktop, mobile, keyboard, and touch paths are covered in the same production-preview suite.
 - The mobile regression reads the actual preview-canvas bounding box at 390 × 844 and requires its bottom edge to be at or above 844 px; it also checks no horizontal overflow.
+- `npx playwright test --grep @claim:demo-sandbox` also passed as the standalone declared claim command from the clean build path.
+
+## Deployment and live evidence
+
+- Deployed the `dist/` output to the scoped production Static Web App `sf-last-lap-breakout` on 2026-09-01.
+- `https://last-lap-breakout.sociobot.in` serves the new bundle and passed `verify-url.sh`: HTTP 200, 654 ms network-idle load, no console errors, title present, `lang="en"`, one main landmark, one h1, no missing image alt text, and no unlabeled buttons.
+- Live header checks confirm the configured CSP, `Referrer-Policy`, `X-Content-Type-Options`, and `Permissions-Policy`.
+- A fresh live 390 × 844 Chromium context preloaded real settings, opened `/demo`, and verified that the real setting was ignored and unchanged while demo settings were written only to `demo:last-lap-breakout:settings:v1`. The live landing canvas bottom was 426 px (within the 844 px cold viewport), with no console errors.
 
 ## Known gaps
 

@@ -33,11 +33,11 @@ npm test
 npm run build
 ```
 
-The test suite covers deterministic simulation, the full eight-lap result path, best-result reload persistence, keyboard and touch input, remapped keys, demo isolation, local recovery, privacy, frame cadence, mobile layout, routes, and accessibility. The production build lands in `dist/` with `index.html` and `404.html` at its root.
+The test suite covers deterministic simulation, the full eight-lap result path, best-result reload persistence, keyboard, touch, playfield drag and P pause input, remapped keys, demo isolation, restored run progress, privacy, frame cadence, mobile layout, routes, and accessibility. The production build lands in `dist/` with `index.html` and `404.html` at its root.
 
 ## Data and privacy
 
-The app has no account, purchases, analytics, ads, or third-party runtime requests. A real run, its settings, and the highest completed result use local storage. The demo uses separate `demo:` session storage keys for both progress and settings and never saves a best result. The game reloads offline after the first visit. A 390px touch/mobile browser simulation at 4× CPU throttling records a 60 fps frame cadence. See `/privacy` and [.factory/demo.md](.factory/demo.md) for details.
+The app has no account, purchases, analytics, ads, or third-party runtime requests. A real run, its settings, and the highest completed result use local storage. The demo uses separate `demo:` session storage keys for both progress and settings and never saves a best result. The game reloads offline after the first visit. At 390px with 4× CPU throttling, the frame test requires a 14–18 ms median and a 90th-percentile interval no slower than 34 ms. See `/privacy` and [.factory/demo.md](.factory/demo.md) for details.
 
 ## Deployment
 

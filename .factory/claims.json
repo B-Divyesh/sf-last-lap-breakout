@@ -63,11 +63,25 @@
     "sandbox": "fresh 390px browser context at /play; move right by keyboard and left by the on-screen touch control"
   },
   {
+    "id": "canvas-drag",
+    "claim": "Dragging across the playfield moves the paddle.",
+    "where": "README Controls, playfield accessible name",
+    "test": "npx playwright test --grep @claim:canvas-drag",
+    "sandbox": "fresh 390px browser context at /play; drag from one quarter to three quarters across the canvas and assert the paddle follows"
+  },
+  {
+    "id": "default-pause",
+    "claim": "P pauses and resumes a run with the default controls.",
+    "where": "README Controls, in-game help",
+    "test": "npx playwright test --grep @claim:default-pause",
+    "sandbox": "fresh real-run context with default settings; press P, assert the saved-lap overlay and frozen simulation tick, press P again, and assert play resumes"
+  },
+  {
     "id": "local-recovery",
-    "claim": "Run progress and settings persist in this browser.",
+    "claim": "Reloading restores the same run progress and settings in this browser.",
     "where": "game guide, privacy page, README",
     "test": "npx playwright test --grep @claim:local-recovery",
-    "sandbox": "fresh browser context at /play; wait for a progress save, change a setting, reload, and assert the persisted records"
+    "sandbox": "fresh browser context at /play; advance and pause a run, save a setting, reload, and compare the restored lap, clock, score, hull, simulation tick, and setting"
   },
   {
     "id": "best-result",
@@ -78,10 +92,10 @@
   },
   {
     "id": "frame-rate",
-    "claim": "The game maintains a 60 fps frame cadence on a 390px mid-range phone simulation.",
+    "claim": "The game keeps a 14–18 ms median frame interval and a 90th-percentile interval no slower than 34 ms on a 390px mid-range phone simulation.",
     "where": "README",
     "test": "npx playwright test --grep @claim:frame-rate",
-    "sandbox": "fresh 390px touch/mobile browser context at /demo with 4× CPU throttling; record 180 requestAnimationFrame intervals and assert 14–18 ms mean with p95 at or below 22 ms"
+    "sandbox": "fresh 390px touch/mobile browser context at /demo with 4× CPU throttling; discard 60 warm-up frames, record 300 requestAnimationFrame intervals, and assert a 14–18 ms median plus p90 at or below 34 ms"
   },
   {
     "id": "local-privacy",

@@ -143,7 +143,7 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
         <span><b>HULL</b> <strong data-hull>◆◆◆◆</strong></span>
       </div>
       <div class="canvas-wrap">
-        <canvas class="game-canvas" width="960" height="1080" tabindex="${preview ? '-1' : '0'}" aria-label="${preview ? 'Sample Breakout board.' : 'Breakout playfield. Move the paddle with left and right arrow keys or A and D.'}"></canvas>
+        <canvas class="game-canvas" width="960" height="1080" tabindex="${preview ? '-1' : '0'}" aria-label="${preview ? 'Sample Breakout board.' : 'Breakout playfield. Move the paddle with left and right arrow keys, A and D, or drag across the playfield.'}"></canvas>
         <div class="game-overlay" data-overlay hidden></div>
         ${preview ? '' : '<p class="canvas-help">Move: ← → or A D <span aria-hidden="true">·</span> Pause: P</p>'}
       </div>
@@ -256,6 +256,7 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
       context.fillStyle = '#f4f1df'; context.font = 'bold 28px monospace'; context.textAlign = 'center'; context.fillText('FINAL CORE', w / 2, 55);
     }
     canvas.dataset.paddle = state.paddleX.toFixed(3);
+    canvas.dataset.tick = String(state.tick);
   }
 
   function setPaused(paused: boolean): void {

@@ -278,17 +278,45 @@ test('@claim:local-recovery progress and settings survive reload', async ({ page
   await page.getByLabel('Mute sound').check();
   await page.getByRole('button', { name: 'Save settings' }).click();
   await page.reload();
-  await page.locator('canvas').focus();
-  await page.keyboard.press('p');
+  await expect(page.getByRole('heading', { name: 'Your lap is saved' })).toBeVisible();
   await expect(page.locator('[data-lap]')).toHaveText(`${saved.lap} / ${TOTAL_LAPS}`);
   await expect(page.locator('[data-score]')).toHaveText(String(saved.score).padStart(6, '0'));
   await expect(page.locator('[data-hull]')).toHaveText(`${'◆'.repeat(saved.hull)}${'◇'.repeat(Math.max(0, 5 - saved.hull))}`);
-  expect(Number(await page.locator('canvas').getAttribute('data-tick'))).toBeGreaterThanOrEqual(saved.tick);
-  expect(Number(await page.locator('canvas').getAttribute('data-tick'))).toBeLessThan(saved.tick + 10);
-  expect(Number(await page.locator('[data-time]').textContent())).toBeLessThanOrEqual(Math.ceil(saved.lapTime));
-  expect(Number(await page.locator('[data-time]').textContent())).toBeGreaterThanOrEqual(Math.ceil(saved.lapTime) - 1);
+  await expect(page.locator('canvas')).toHaveAttribute('data-tick', String(saved.tick));
+  await expect(page.locator('[data-time]')).toHaveText(String(Math.ceil(saved.lapTime)).padStart(2, '0'));
+  await page.locator('canvas').focus();
+  await page.keyboard.press('p');
+  await expect(page.getByRole('heading', { name: 'Your lap is saved' })).toBeHidden();
+  await expect.poll(() => page.locator('canvas').getAttribute('data-tick')).not.toBe(String(saved.tick));
   await page.getByRole('button', { name: 'Game settings' }).click();
   await expect(page.getByLabel('Mute sound')).toBeChecked();
+});
+
+test('@claim:autosave-cadence active progress automatically saves once per second without pausing', async ({ page }) => {
+  await page.addInitScript(() => {
+    const checkpoints: Array<{ at: number; tick: number; status: string }> = [];
+    const originalSetItem = Storage.prototype.setItem;
+    Storage.prototype.setItem = function(key: string, value: string): void {
+      if (this === localStorage && key === 'last-lap-breakout:v1') {
+        const run = JSON.parse(value) as { tick: number; status: string };
+        checkpoints.push({ at: performance.now(), tick: run.tick, status: run.status });
+      }
+      originalSetItem.call(this, key, value);
+    };
+    Object.defineProperty(window, '__llbAutosaves', { value: checkpoints });
+  });
+  await page.goto('/play');
+  await expect.poll(() => page.evaluate(() => (window as unknown as { __llbAutosaves: unknown[] }).__llbAutosaves.length), { timeout: 3_500 }).toBeGreaterThanOrEqual(2);
+  const checkpoints = await page.evaluate(() => (window as unknown as { __llbAutosaves: Array<{ at: number; tick: number; status: string }> }).__llbAutosaves.slice(0, 2));
+  expect(checkpoints).toHaveLength(2);
+  expect(checkpoints[0].status).toBe('playing');
+  expect(checkpoints[1].status).toBe('playing');
+  expect(checkpoints[0].tick).toBeGreaterThan(0);
+  expect(checkpoints[1].tick).toBeGreaterThan(checkpoints[0].tick);
+  expect(checkpoints[0].at).toBeGreaterThanOrEqual(950);
+  expect(checkpoints[0].at).toBeLessThanOrEqual(1_300);
+  expect(checkpoints[1].at - checkpoints[0].at).toBeGreaterThanOrEqual(950);
+  expect(checkpoints[1].at - checkpoints[0].at).toBeLessThanOrEqual(1_300);
 });
 
 test('@claim:best-result a completed real run saves its best result through reload', async ({ page }) => {

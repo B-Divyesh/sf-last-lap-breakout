@@ -84,6 +84,13 @@
     "sandbox": "fresh browser context at /play; advance and pause a run, save a setting, reload, and compare the restored lap, clock, score, hull, simulation tick, and setting"
   },
   {
+    "id": "autosave-cadence",
+    "claim": "An active run automatically saves progress once per second.",
+    "where": "game guide",
+    "test": "npx playwright test --grep @claim:autosave-cadence",
+    "sandbox": "fresh browser context at /play; record real local-storage writes without pausing or changing settings, and assert two playing-state checkpoints arrive one second apart"
+  },
+  {
     "id": "best-result",
     "claim": "A completed real run saves its best result in this browser.",
     "where": "end screen, privacy page, README",

@@ -5,6 +5,7 @@ const DEMO_KEY = 'demo:last-lap-breakout:v1';
 const SETTINGS_KEY = 'last-lap-breakout:settings:v1';
 const DEMO_SETTINGS_KEY = 'demo:last-lap-breakout:settings:v1';
 const BEST_RESULT_KEY = 'last-lap-breakout:best:v1';
+const AUTOSAVE_INTERVAL_MS = 1000;
 
 type KeyBindings = { left: string; right: string; pause: string };
 type Settings = { assist: boolean; muted: boolean; shake: boolean; keys: KeyBindings };
@@ -117,12 +118,13 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
   const settings = preview ? { assist: false, muted: false, shake: true, keys: { ...DEFAULT_KEYS } } : readSettings(demo);
   if (options.reset) eraseRun(storageKey, demo);
   let state = preview ? createRun(0x8badf00d, false) : readRun(storageKey, demo) || createRun(demo ? 0x1a57d3a0 : Date.now(), settings.assist);
-  if (!preview && state.status === 'paused') state.status = 'playing';
   let direction: -1 | 0 | 1 = 0;
   let raf = 0;
   let last = performance.now();
   let accumulator = 0;
-  let lastSave = 0;
+  // A restored paused run must remain an exact snapshot until the player
+  // chooses Resume. Active runs checkpoint on this same one-second cadence.
+  let lastSave = last;
   let disposed = false;
   let audio: AudioContext | null = null;
   let lastHits = state.hits;
@@ -304,7 +306,7 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
         }
         lastHits = state.hits;
       }
-      if (!preview && now - lastSave > 1000) { saveRun(storageKey, state, demo); lastSave = now; }
+      if (!preview && now - lastSave >= AUTOSAVE_INTERVAL_MS) { saveRun(storageKey, state, demo); lastSave = now; }
     }
     syncHud(); showOverlay(); draw();
     raf = requestAnimationFrame(loop);

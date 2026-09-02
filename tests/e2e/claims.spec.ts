@@ -1,22 +1,70 @@
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
+import {
+  brickDamage,
+  choosePerk,
+  createRun,
+  hitScore,
+  LAP_SECONDS,
+  lapClearScore,
+  launchSpeed,
+  makeBricks,
+  paddleAngleMultiplier,
+  paddleSpeed,
+  paddleWidth,
+  PERKS,
+  RunState,
+  splitHitBonus,
+  STEP,
+  stepRun,
+  TOTAL_LAPS
+} from '../../src/game/core';
+
+async function finishAcceleratedRun(page: import('@playwright/test').Page): Promise<void> {
+  for (let lap = 1; lap < TOTAL_LAPS; lap++) {
+    await expect(page.getByRole('heading', { name: 'Choose one modifier' })).toBeVisible();
+    await expect(page.locator('[data-perk]')).toHaveCount(3);
+    if (lap === 1) await page.keyboard.press('1');
+    else await page.locator('[data-perk]').first().click();
+  }
+  await expect(page.getByRole('heading', { name: 'Run complete' })).toBeVisible();
+}
+
+function advanceExactlyOneLap(run: RunState): void {
+  expect(run.lapTime).toBe(LAP_SECONDS);
+  // Keep the orb inert so this test proves the fixed timer rather than paddle skill.
+  run.ball.y = 0.5; run.ball.vx = 0; run.ball.vy = 0;
+  for (let tick = 0; tick < LAP_SECONDS / STEP; tick++) stepRun(run, STEP, 0);
+  expect(run.lapTime).toBe(0);
+}
 
 test('@claim:finite-run a title-screen sample reaches the eighth-lap result', async ({ page }) => {
+  const simulation = createRun(0x1a57d3a0);
+  for (let lap = 1; lap <= TOTAL_LAPS; lap++) {
+    advanceExactlyOneLap(simulation);
+    if (lap < TOTAL_LAPS) {
+      expect(simulation.status).toBe('draft');
+      choosePerk(simulation, simulation.draft[0]);
+    }
+  }
+  expect(simulation.elapsed).toBeCloseTo(TOTAL_LAPS * LAP_SECONDS, 8);
+  expect(simulation.status).toBe('won');
+  const finalCore = makeBricks(TOTAL_LAPS);
+  expect(finalCore.filter(brick => brick.boss)).toHaveLength(1);
+  expect(finalCore.filter(brick => !brick.boss && brick.hp === 2)).toHaveLength(10);
+
   await page.goto('/?test=1');
   await page.getByRole('link', { name: 'Try it with sample data' }).click();
   await expect(page).toHaveURL(/\/demo\?test=1$/);
-  for (let lap = 1; lap < 8; lap++) {
-    await expect(page.getByRole('heading', { name: 'Choose one modifier' })).toBeVisible();
-    await page.locator('[data-perk]').first().click();
-  }
-  await expect(page.getByRole('heading', { name: 'Run complete' })).toBeVisible();
+  await finishAcceleratedRun(page);
   await expect(page.getByLabel('Build string')).toHaveValue('LLB-7B4T5S-CEBQHDW-0SBRZTA');
 });
 
 test('@claim:demo-sandbox demo is marked and uses a separate namespace', async ({ page }) => {
-  await page.goto('/demo');
+  await page.goto('/');
   await page.evaluate(() => localStorage.setItem('last-lap-breakout:settings:v1', JSON.stringify({ assist: true, muted: true, shake: false })));
-  await page.reload();
+  await page.getByRole('link', { name: 'Try it with sample data' }).click();
+  await expect(page).toHaveURL('/demo');
   await expect(page.getByText('Demo — sample data, nothing is saved')).toBeVisible();
   await page.getByRole('button', { name: 'Game settings' }).click();
   await expect(page.getByLabel('Mute sound')).not.toBeChecked();
@@ -36,14 +84,142 @@ test('@claim:demo-sandbox demo is marked and uses a separate namespace', async (
     settings: sessionStorage.getItem('demo:last-lap-breakout:settings:v1'),
     run: JSON.parse(sessionStorage.getItem('demo:last-lap-breakout:v1') || '{}').seed
   }))).toEqual({ settings: null, run: 0x1a57d3a0 });
+  await page.getByRole('link', { name: 'Start for real' }).click();
+  await expect(page).toHaveURL('/play');
+  await expect.poll(() => page.evaluate(() => ({
+    demoRun: sessionStorage.getItem('demo:last-lap-breakout:v1'),
+    demoSettings: sessionStorage.getItem('demo:last-lap-breakout:settings:v1'),
+    realSettings: localStorage.getItem('last-lap-breakout:settings:v1')
+  }))).toEqual({
+    demoRun: null,
+    demoSettings: null,
+    realSettings: JSON.stringify({ assist: true, muted: true, shake: false })
+  });
+});
+
+test('@claim:assist-mode assist mode widens the next paddle, slows the orb, and adds one hull point', async ({ page }) => {
+  await page.goto('/demo');
+  await page.getByRole('button', { name: 'Game settings' }).click();
+  await page.getByLabel('Assist mode').check();
+  await page.getByRole('button', { name: 'Save settings' }).click();
+  await expect.poll(() => page.evaluate(() => JSON.parse(sessionStorage.getItem('demo:last-lap-breakout:settings:v1') || '{}').assist)).toBe(true);
+
+  const normal = createRun(88, false);
+  const assisted = createRun(88, true);
+  expect(assisted.hull).toBe(normal.hull + 1);
+  expect(paddleWidth(assisted)).toBeGreaterThan(paddleWidth(normal));
+  expect(launchSpeed({ ...normal, lap: 2 })).toBeGreaterThan(launchSpeed({ ...assisted, lap: 2 }));
+});
+
+test('@claim:modifier-effects every modifier card has the exact effect it states', async ({ page }) => {
+  await page.goto('/demo');
+  expect(PERKS.map(perk => [perk.id, perk.detail])).toEqual([
+    ['wide', 'Paddle grows 18%.'],
+    ['quick', 'Paddle moves 16% faster.'],
+    ['heavy', 'Hits score 40% more.'],
+    ['split', 'Every fifth hit scores twice.'],
+    ['guard', 'Restore one hull point.'],
+    ['magnet', 'Paddle angles are easier.'],
+    ['pierce', 'Boss hits deal two damage.'],
+    ['bonus', 'Lap clears add 300 points.'],
+    ['steady', 'Orb speed rises less each lap.']
+  ]);
+
+  const base = createRun(19);
+  const withPerk = (id: RunState['perks'][number]): RunState => ({ ...createRun(19), perks: [id] });
+  expect(paddleWidth(withPerk('wide')) / paddleWidth(base)).toBeCloseTo(1.18, 8);
+  expect(paddleSpeed(withPerk('quick')) / paddleSpeed(base)).toBeCloseTo(1.16, 8);
+  expect(hitScore(withPerk('heavy'), false) / hitScore(base, false)).toBeCloseTo(1.4, 8);
+  expect(splitHitBonus({ ...withPerk('split'), hits: 5 })).toBe(hitScore(base, false));
+  const guard = { ...createRun(19), hull: 3, status: 'draft' as const, draft: ['guard', 'wide', 'quick'] as RunState['draft'] };
+  choosePerk(guard, 'guard');
+  expect(guard.hull).toBe(4);
+  expect(paddleAngleMultiplier(withPerk('magnet'))).toBe(0.7);
+  expect(brickDamage(withPerk('pierce'), { boss: true })).toBe(2);
+  expect(lapClearScore(withPerk('bonus')) - lapClearScore(base)).toBe(300);
+  expect(launchSpeed({ ...withPerk('steady'), lap: 4 })).toBeLessThan(launchSpeed({ ...base, lap: 4 }));
+});
+
+test('@claim:key-remapping keyboard settings add J/L and H/K movement plus Escape pause', async ({ page }) => {
+  await page.goto('/play');
+  await page.getByRole('button', { name: 'Game settings' }).click();
+  const mappings = [page.getByLabel('Left movement'), page.getByLabel('Right movement'), page.getByLabel('Pause run')];
+  for (const mapping of mappings) {
+    await mapping.focus();
+    expect(await mapping.evaluate(element => {
+      const style = getComputedStyle(element);
+      return { width: style.outlineWidth, style: style.outlineStyle, color: style.outlineColor };
+    })).toEqual({ width: '3px', style: 'solid', color: 'rgb(255, 209, 102)' });
+  }
+  await mappings[0].selectOption('j');
+  await mappings[1].selectOption('l');
+  await mappings[2].selectOption('Escape');
+  await page.getByRole('button', { name: 'Save settings' }).click();
+
+  const canvas = page.locator('canvas');
+  await canvas.focus();
+  const start = Number(await canvas.getAttribute('data-paddle'));
+  await page.keyboard.down('j'); await page.waitForTimeout(140); await page.keyboard.up('j');
+  const afterJ = Number(await canvas.getAttribute('data-paddle'));
+  expect(afterJ).toBeLessThan(start);
+  await page.keyboard.down('l'); await page.waitForTimeout(140); await page.keyboard.up('l');
+  const afterL = Number(await canvas.getAttribute('data-paddle'));
+  expect(afterL).toBeGreaterThan(afterJ);
+  await page.keyboard.down('ArrowLeft'); await page.waitForTimeout(140); await page.keyboard.up('ArrowLeft');
+  expect(Number(await canvas.getAttribute('data-paddle'))).toBeLessThan(afterL);
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('heading', { name: 'Your lap is saved' })).toBeVisible();
+
+  await page.getByRole('button', { name: 'Game settings' }).click();
+  await mappings[0].selectOption('h');
+  await mappings[1].selectOption('k');
+  await page.getByRole('button', { name: 'Save settings' }).click();
+  await page.locator('[data-resume]').click();
+  await canvas.focus();
+  const afterResume = Number(await canvas.getAttribute('data-paddle'));
+  await page.keyboard.down('h'); await page.waitForTimeout(140); await page.keyboard.up('h');
+  const afterH = Number(await canvas.getAttribute('data-paddle'));
+  expect(afterH).toBeLessThan(afterResume);
+  await page.keyboard.down('k'); await page.waitForTimeout(140); await page.keyboard.up('k');
+  expect(Number(await canvas.getAttribute('data-paddle'))).toBeGreaterThan(afterH);
+});
+
+test('@claim:deterministic-build identical sample choices produce an identical build string', async ({ page }) => {
+  await page.goto('/demo?test=1');
+  await finishAcceleratedRun(page);
+  const first = await page.getByLabel('Build string').inputValue();
+  await page.getByRole('button', { name: 'Start another run' }).click();
+  await finishAcceleratedRun(page);
+  expect(await page.getByLabel('Build string').inputValue()).toBe(first);
+});
+
+test('@claim:copy-build a result build string can be copied', async ({ page }) => {
+  await page.context().grantPermissions(['clipboard-read', 'clipboard-write'], { origin: 'http://127.0.0.1:4173' });
+  await page.goto('/demo?test=1');
+  await finishAcceleratedRun(page);
+  await page.getByRole('button', { name: 'Copy build string' }).click();
+  await expect(page.locator('[data-copy-status]')).toHaveText('Build string copied.');
 });
 
 test('a deterministic loss reaches its end screen and restart resets the run', async ({ page }) => {
   await page.goto('/play?test=loss');
   await expect(page.getByRole('heading', { name: 'Hull depleted' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Pause run' })).toBeHidden();
   await page.getByRole('button', { name: 'Start another run' }).click();
   await expect(page.locator('[data-lap]')).toHaveText('1 / 8');
   await expect(page.getByRole('heading', { name: 'Hull depleted' })).not.toBeVisible();
+});
+
+test('@claim:hull-loss each missed orb costs one hull point and zero hull ends the run', async ({ page }) => {
+  await page.goto('/demo');
+  const run = createRun(404);
+  for (let miss = 1; miss <= 4; miss++) {
+    run.ball.y = 1.02;
+    run.ball.vy = 0.4;
+    stepRun(run, STEP, 0);
+    expect(run.hull).toBe(4 - miss);
+  }
+  expect(run.status).toBe('lost');
 });
 
 test('@claim:input-parity keyboard and touch controls move the paddle', async ({ page }) => {
@@ -91,8 +267,16 @@ test('@claim:best-result a completed real run saves its best result through relo
   await expect.poll(() => page.evaluate(() => localStorage.getItem('last-lap-breakout:best:v1'))).toBe(beforeReload);
 });
 
-test('@claim:frame-rate the 390px game maintains a 60 fps frame cadence', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
+test('@claim:frame-rate the 390px touch game maintains a 60 fps frame cadence under 4x CPU throttling', async ({ browser }) => {
+  const context = await browser.newContext({
+    viewport: { width: 390, height: 844 },
+    deviceScaleFactor: 2,
+    isMobile: true,
+    hasTouch: true
+  });
+  const page = await context.newPage();
+  const cdp = await context.newCDPSession(page);
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
   await page.goto('/demo');
   const intervals = await page.evaluate(() => new Promise<number[]>(resolve => {
     const times: number[] = [];
@@ -109,15 +293,19 @@ test('@claim:frame-rate the 390px game maintains a 60 fps frame cadence', async 
   expect(average).toBeGreaterThanOrEqual(14);
   expect(average).toBeLessThanOrEqual(18);
   expect(p95).toBeLessThanOrEqual(22);
+  await context.close();
 });
 
-test('@claim:local-privacy the demo sends requests only to this site', async ({ page }) => {
+test('@claim:local-privacy the demo has no account, purchases, ads, analytics, or personal-data requests', async ({ page }) => {
   const origins = new Set<string>();
+  const requests: string[] = [];
   page.on('request', request => origins.add(new URL(request.url()).origin));
+  page.on('request', request => requests.push(new URL(request.url()).pathname));
   await page.goto('/demo');
   await page.waitForTimeout(500);
   expect([...origins]).toEqual(['http://127.0.0.1:4173']);
-  await expect(page.getByText('Free. No account.')).toBeVisible({ timeout: 100 }).catch(() => undefined);
+  expect(requests.every(path => path === '/' || path === '/demo' || path === '/index.html' || path === '/sw.js' || path.startsWith('/assets/') || path.startsWith('/build/') || path === '/favicon.svg')).toBe(true);
+  expect(await page.locator('iframe, input[type="email"], input[type="password"], form[action], [href*="login" i], [href*="checkout" i], [href*="payment" i]').count()).toBe(0);
 });
 
 test('@claim:offline-reload the game reloads offline after the first visit', async ({ browser }) => {
@@ -130,6 +318,53 @@ test('@claim:offline-reload the game reloads offline after the first visit', asy
   await page.reload();
   await expect(page.getByRole('heading', { name: 'Play an eight-lap Breakout run' })).toBeVisible();
   await context.close();
+});
+
+test('@claim:reduced-motion the game honors the browser reduced-motion preference', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/play');
+  expect(await page.locator('.button').first().evaluate(element => Number.parseFloat(getComputedStyle(element).transitionDuration))).toBeLessThanOrEqual(0.00001);
+  expect(await page.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches)).toBe(true);
+});
+
+test('opening Game settings freezes active play until the dialog closes', async ({ page }) => {
+  await page.goto('/play');
+  const before = await page.locator('[data-time]').textContent();
+  await page.getByRole('button', { name: 'Game settings' }).click();
+  await page.waitForTimeout(1600);
+  await expect(page.locator('#settings-dialog')).toHaveJSProperty('open', true);
+  await expect(page.locator('[data-time]')).toHaveText(before || '');
+  await page.getByRole('button', { name: 'Save settings' }).click();
+  await expect.poll(() => page.locator('[data-time]').textContent()).not.toBe(before);
+});
+
+test('the landing sample board stays static after its first render', async ({ page }) => {
+  await page.addInitScript(() => {
+    let calls = 0;
+    const native = window.requestAnimationFrame.bind(window);
+    window.requestAnimationFrame = callback => {
+      calls += 1;
+      return native(callback);
+    };
+    Object.defineProperty(window, '__llbRafCalls', { get: () => calls });
+  });
+  await page.goto('/');
+  await page.waitForTimeout(300);
+  expect(await page.evaluate(() => (window as unknown as { __llbRafCalls: number }).__llbRafCalls)).toBe(0);
+});
+
+test('the immutable cache route targets only Vite hashed build files', async ({ page }) => {
+  await page.goto('/');
+  const raw = await (await page.request.get('/staticwebapp.config.json')).text();
+  const config = JSON.parse(raw) as { routes: Array<{ route: string; headers?: Record<string, string> }> };
+  expect((raw.match(/"routes"/g) || [])).toHaveLength(1);
+  expect(config.routes[0]).toEqual({ route: '/build/*', headers: { 'Cache-Control': 'public, max-age=31536000, immutable' } });
+  const hashedFiles = await page.locator('link[rel="stylesheet"], script[type="module"]').evaluateAll(nodes => nodes.map(node => {
+    const value = node instanceof HTMLLinkElement ? node.href : (node as HTMLScriptElement).src;
+    return new URL(value).pathname;
+  }));
+  expect(hashedFiles).toHaveLength(2);
+  expect(hashedFiles.every(path => /^\/build\/(?:main|style)-[A-Za-z0-9_-]+\.(?:js|css)$/.test(path))).toBe(true);
 });
 
 test('landing pages have no serious accessibility findings', async ({ page }) => {

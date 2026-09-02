@@ -1,4 +1,4 @@
-import { buildString, choosePerk, createRun, LAP_SECONDS, PERKS, RunState, STEP, stepRun, TOTAL_LAPS } from './core';
+import { buildString, choosePerk, createRun, LAP_SECONDS, paddleWidth, PERKS, RunState, STEP, stepRun, TOTAL_LAPS } from './core';
 
 const REAL_KEY = 'last-lap-breakout:v1';
 const DEMO_KEY = 'demo:last-lap-breakout:v1';
@@ -143,15 +143,15 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
         <span><b>HULL</b> <strong data-hull>◆◆◆◆</strong></span>
       </div>
       <div class="canvas-wrap">
-        <canvas class="game-canvas" width="960" height="1080" tabindex="0" aria-label="Breakout playfield. Move the paddle with left and right arrow keys or A and D."></canvas>
+        <canvas class="game-canvas" width="960" height="1080" tabindex="${preview ? '-1' : '0'}" aria-label="${preview ? 'Sample Breakout board.' : 'Breakout playfield. Move the paddle with left and right arrow keys or A and D.'}"></canvas>
         <div class="game-overlay" data-overlay hidden></div>
-        <p class="canvas-help">Move: ← → or A D <span aria-hidden="true">·</span> Pause: P</p>
+        ${preview ? '' : '<p class="canvas-help">Move: ← → or A D <span aria-hidden="true">·</span> Pause: P</p>'}
       </div>
       ${preview ? '' : `<div class="game-actions"><button class="button button-small" data-pause type="button">Pause run</button><button class="button button-small button-quiet" data-settings type="button">Game settings</button></div>`}
-      <div class="touch-controls" aria-label="Touch paddle controls">
+      ${preview ? '' : `<div class="touch-controls" aria-label="Touch paddle controls">
         <button type="button" data-move="-1" aria-label="Move paddle left">◀ <span>Left</span></button>
         <button type="button" data-move="1" aria-label="Move paddle right"><span>Right</span> ▶</button>
-      </div>
+      </div>`}
       <p class="sr-only" data-game-status aria-live="assertive"></p>
     </section>`;
 
@@ -165,6 +165,8 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
   const scoreNode = host.querySelector<HTMLElement>('[data-score]')!;
   const hullNode = host.querySelector<HTMLElement>('[data-hull]')!;
   const pauseButton = host.querySelector<HTMLButtonElement>('[data-pause]');
+  const settingsDialog = preview ? null : document.querySelector<HTMLDialogElement>('#settings-dialog');
+  let resumeAfterSettings = false;
 
   function tone(frequency: number, duration = 0.035): void {
     if (settings.muted || preview || !userActivated) return;
@@ -185,6 +187,12 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
     scoreNode.textContent = String(state.score).padStart(6, '0');
     hullNode.textContent = `${'◆'.repeat(state.hull)}${'◇'.repeat(Math.max(0, 5 - state.hull))}`;
     timeNode.closest('span')?.classList.toggle('is-urgent', state.lapTime <= 10);
+    if (pauseButton) {
+      const terminal = state.status === 'won' || state.status === 'lost';
+      pauseButton.hidden = terminal;
+      pauseButton.disabled = terminal;
+      pauseButton.textContent = state.status === 'paused' ? 'Resume run' : 'Pause run';
+    }
   }
 
   function perkButton(id: string, index: number): string {
@@ -196,7 +204,7 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
     const nextKey = `${state.status}:${state.lap}:${state.status === 'won' || state.status === 'lost' ? state.score : ''}`;
     if (nextKey === overlayKey) return;
     overlayKey = nextKey;
-    if (state.status === 'playing') { overlay.hidden = true; overlay.innerHTML = ''; return; }
+    if (state.status === 'playing') { overlayKey = ''; overlay.hidden = true; overlay.innerHTML = ''; return; }
     overlay.hidden = false;
     if (state.status === 'draft') {
       overlay.innerHTML = `<div class="overlay-panel"><p class="eyebrow">Lap ${state.lap} clear</p><h2>Choose one modifier</h2><p>Keys 1–3 also choose.</p><div class="perk-grid">${state.draft.map(perkButton).join('')}</div></div>`;
@@ -237,10 +245,10 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
         context.fillStyle = '#f4f1df'; context.fillRect(x + bw * 0.35, y + bh * 0.35, bw * 0.3, bh * 0.3);
       }
     }
-    const paddleWidth = (state.assist ? 0.25 : 0.19) * (state.perks.includes('wide') ? 1.18 : 1);
-    const px = (state.paddleX - paddleWidth / 2) * w, py = h * 0.88;
-    context.fillStyle = '#293052'; context.fillRect(px - 8, py + 10, paddleWidth * w + 16, 25);
-    context.fillStyle = '#64f4c2'; context.fillRect(px, py, paddleWidth * w, 25);
+    const width = paddleWidth(state);
+    const px = (state.paddleX - width / 2) * w, py = h * 0.88;
+    context.fillStyle = '#293052'; context.fillRect(px - 8, py + 10, width * w + 16, 25);
+    context.fillStyle = '#64f4c2'; context.fillRect(px, py, width * w, 25);
     context.fillStyle = '#f4f1df';
     context.beginPath(); context.arc(state.ball.x * w, state.ball.y * h, state.ball.r * w, 0, Math.PI * 2); context.fill();
     context.fillStyle = '#64f4c2'; context.fillRect(state.ball.x * w - 4, state.ball.y * h - 4, 8, 8);
@@ -251,11 +259,23 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
   }
 
   function setPaused(paused: boolean): void {
+    if (state.status !== 'playing' && state.status !== 'paused') return;
     if (paused && state.status === 'playing') state.status = 'paused';
     else if (!paused && state.status === 'paused') state.status = 'playing';
-    if (pauseButton) pauseButton.textContent = state.status === 'paused' ? 'Resume run' : 'Pause run';
     showOverlay();
     saveRun(storageKey, state, demo);
+  }
+
+  function openSettings(): void {
+    if (!settingsDialog) return;
+    resumeAfterSettings = state.status === 'playing';
+    if (resumeAfterSettings) setPaused(true);
+    settingsDialog.showModal();
+  }
+
+  function onSettingsClose(): void {
+    if (resumeAfterSettings && state.status === 'paused') setPaused(false);
+    resumeAfterSettings = false;
   }
 
   function loop(now: number): void {
@@ -294,7 +314,7 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
     const key = event.key.toLowerCase();
     if (event.key === 'ArrowLeft' || key === 'a' || key === settings.keys.left.toLowerCase()) { direction = -1; event.preventDefault(); }
     if (event.key === 'ArrowRight' || key === 'd' || key === settings.keys.right.toLowerCase()) { direction = 1; event.preventDefault(); }
-    if (!preview && key === settings.keys.pause.toLowerCase()) { setPaused(state.status !== 'paused'); event.preventDefault(); }
+    if (!preview && key === settings.keys.pause.toLowerCase() && (state.status === 'playing' || state.status === 'paused')) { setPaused(state.status !== 'paused'); event.preventDefault(); }
     if (state.status === 'paused' && (event.key === 'Enter' || event.key === ' ')) setPaused(false);
     if (state.status === 'draft' && ['1', '2', '3'].includes(event.key)) {
       choosePerk(state, state.draft[Number(event.key) - 1]); tone(440, 0.08); showOverlay();
@@ -323,10 +343,15 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
       try { await navigator.clipboard.writeText(buildString(state)); host.querySelector<HTMLElement>('[data-copy-status]')!.textContent = 'Build string copied.'; }
       catch { host.querySelector<HTMLElement>('[data-copy-status]')!.textContent = 'Copy failed. Select the build string instead.'; }
     }
-    if (target.dataset.settings !== undefined) {
-      const dialog = document.querySelector<HTMLDialogElement>('#settings-dialog'); dialog?.showModal();
-    }
+    if (target.dataset.settings !== undefined) openSettings();
   });
+
+  // The landing board is a static sample. A full 960×1080 canvas simulation
+  // here consumed main-thread time on phones without helping anyone play.
+  if (preview) {
+    syncHud(); draw();
+    return () => { disposed = true; cancelAnimationFrame(raf); };
+  }
 
   for (const button of host.querySelectorAll<HTMLButtonElement>('[data-move]')) {
     const value = Number(button.dataset.move) as -1 | 1;
@@ -341,12 +366,14 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
   document.addEventListener('visibilitychange', onVisibility);
   const onSettings = (event: Event): void => { Object.assign(settings, (event as CustomEvent<Settings>).detail); };
   document.addEventListener('llb-settings', onSettings);
+  settingsDialog?.addEventListener('close', onSettingsClose);
   syncHud(); draw(); raf = requestAnimationFrame(loop);
 
   return () => {
     disposed = true; cancelAnimationFrame(raf);
     if (!preview && state.status !== 'won' && state.status !== 'lost') saveRun(storageKey, state, demo);
     document.removeEventListener('keydown', onKey); document.removeEventListener('keyup', onKeyUp); document.removeEventListener('visibilitychange', onVisibility); document.removeEventListener('llb-settings', onSettings);
+    settingsDialog?.removeEventListener('close', onSettingsClose);
     audio?.close();
   };
 }

@@ -1,11 +1,9 @@
 {
   "routes": [
     {
-      "route": "/assets/index-*",
+      "route": "/build/*",
       "headers": { "Cache-Control": "public, max-age=31536000, immutable" }
-    }
-  ],
-  "routes": [
+    },
     { "route": "/", "rewrite": "/index.html" },
     { "route": "/demo", "rewrite": "/index.html" },
     { "route": "/play", "rewrite": "/index.html" },

@@ -33,8 +33,8 @@ function settingsDialog(): string {
     <form method="dialog" class="settings-panel">
       <p class="eyebrow">Game settings</p><h2 id="settings-title">Change how the run feels</h2>
       <label class="switch-row"><span><strong>Assist mode</strong><small>Wider paddle, slower orb, and one more hull point. Starts next run.</small></span><input type="checkbox" name="assist" /></label>
-      <label class="switch-row"><span><strong>Mute sound</strong><small>Stops hit tones. Sound starts only after you play.</small></span><input type="checkbox" name="muted" /></label>
-      <label class="switch-row"><span><strong>Screen movement</strong><small>Allows short movement on impacts. Reduced-motion settings override this.</small></span><input type="checkbox" name="shake" /></label>
+      <label class="switch-row"><span><strong>Mute sound</strong></span><input type="checkbox" name="muted" /></label>
+      <label class="switch-row"><span><strong>Screen movement</strong></span><input type="checkbox" name="shake" /></label>
       <fieldset class="key-bindings"><legend>Keyboard mapping</legend>
         <p>Choose extra keys for movement and pause. Arrow keys and A/D remain available.</p>
         <label>Left movement <select name="left-key"><option value="ArrowLeft">Left Arrow</option><option value="j">J</option><option value="h">H</option></select></label>
@@ -67,7 +67,7 @@ function homePage(): string {
       <div class="hero-stage">
         <picture class="hero-art" aria-hidden="true"><source srcset="/assets/orbital-breakout.avif" type="image/avif"><img src="/assets/orbital-breakout.webp" width="960" height="640" alt="" fetchpriority="high"></picture>
         <div id="preview-game"></div>
-        <p class="preview-label"><span aria-hidden="true"></span> Live seeded preview</p>
+        <p class="preview-label"><span aria-hidden="true"></span> Sample board</p>
       </div>
     </section>
 
@@ -84,7 +84,7 @@ function homePage(): string {
 
     <section class="limits-section">
       <div><p class="eyebrow">A finite game</p><h2>What this game does not do</h2></div>
-      <p>No daily grind. No battle pass. No ads between laps. Your run and settings stay in this browser. The game reloads offline after your first visit.</p>
+      <p>Your run and settings stay in this browser. The game reloads offline after your first visit.</p>
       <a class="button" href="/play" data-link>Start a new run</a>
     </section>
   </main>${footer()}${settingsDialog()}`;
@@ -103,7 +103,7 @@ function privacyPage(): string {
 }
 
 function termsPage(): string {
-  return `${header()}<main id="main" class="text-page"><p class="eyebrow">Terms</p><h1 tabindex="-1">Play for free</h1><p>Last Lap Breakout is a free browser game for personal use.</p><h2>Fair use</h2><p>Do not interfere with the site or use it to harm another person.</p><h2>No purchases</h2><p>The game has no paid items, wagers, prizes, or random purchases.</p><h2>Availability</h2><p>The game is provided as available. Runs can be lost if browser storage is cleared.</p><p>Effective: September 1, 2026.</p></main>${footer()}`;
+  return `${header()}<main id="main" class="text-page"><p class="eyebrow">Terms</p><h1 tabindex="-1">Play for free</h1><p>Last Lap Breakout is a free browser game for personal use.</p><h2>Fair use</h2><p>Do not interfere with the site or use it to harm another person.</p><h2>No purchases</h2><p>The game has no purchases.</p><h2>Availability</h2><p>The game is provided as available.</p><p>Effective: September 1, 2026.</p></main>${footer()}`;
 }
 
 function notFoundPage(): string {

@@ -28,9 +28,6 @@ Audited on 2026-09-01. Counts treat numbers and hyphenated terms as one word. No
 | Lap eight has a guarded core. | 6 | Pass |
 | Survive it to get your score and build string. | 9 | Pass |
 | What this game does not do. | 6 | Pass |
-| No daily grind. | 3 | Pass |
-| No battle pass. | 3 | Pass |
-| No ads between laps. | 4 | Pass |
 | Your run and settings stay in this browser. | 8 | Pass |
 | The game reloads offline after your first visit. | 8 | Pass |
 

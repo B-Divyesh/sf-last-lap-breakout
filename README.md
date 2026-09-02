@@ -37,7 +37,7 @@ The test suite covers deterministic simulation, the full eight-lap result path, 
 
 ## Data and privacy
 
-The app has no account, analytics, ads, or third-party runtime requests. A real run, its settings, and the highest completed result use local storage. The demo uses separate `demo:` session storage keys for both progress and settings and never saves a best result. The game reloads offline after the first visit. The 390px browser measurement records a 60 fps frame cadence. See `/privacy` and [.factory/demo.md](.factory/demo.md) for details.
+The app has no account, purchases, analytics, ads, or third-party runtime requests. A real run, its settings, and the highest completed result use local storage. The demo uses separate `demo:` session storage keys for both progress and settings and never saves a best result. The game reloads offline after the first visit. A 390px touch/mobile browser simulation at 4× CPU throttling records a 60 fps frame cadence. See `/privacy` and [.factory/demo.md](.factory/demo.md) for details.
 
 ## Deployment
 

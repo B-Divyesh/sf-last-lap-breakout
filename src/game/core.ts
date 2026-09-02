@@ -40,6 +40,41 @@ export type RunState = {
   lastInput: -1 | 0 | 1;
 };
 
+type RunTraits = Pick<RunState, 'assist' | 'perks'>;
+
+/** Shared gameplay values also power the modifier-card regression coverage. */
+export function paddleWidth(state: RunTraits): number {
+  return (state.assist ? 0.25 : 0.19) * (state.perks.includes('wide') ? 1.18 : 1);
+}
+
+export function paddleSpeed(state: RunTraits): number {
+  return (state.assist ? 0.7 : 0.62) * (state.perks.includes('quick') ? 1.16 : 1);
+}
+
+export function launchSpeed(state: Pick<RunState, 'assist' | 'perks' | 'lap'>): number {
+  return (state.assist ? 0.39 : 0.44) + state.lap * (state.perks.includes('steady') ? 0.012 : 0.02);
+}
+
+export function paddleAngleMultiplier(state: RunTraits): number {
+  return state.perks.includes('magnet') ? 0.7 : 1;
+}
+
+export function brickDamage(state: Pick<RunState, 'perks'>, brick: Pick<Brick, 'boss'>): number {
+  return brick.boss && state.perks.includes('pierce') ? 2 : 1;
+}
+
+export function hitScore(state: Pick<RunState, 'perks'>, boss: boolean): number {
+  return Math.round((boss ? 80 : 35) * (state.perks.includes('heavy') ? 1.4 : 1));
+}
+
+export function splitHitBonus(state: Pick<RunState, 'perks' | 'hits'>): number {
+  return state.perks.includes('split') && state.hits % 5 === 0 ? 35 : 0;
+}
+
+export function lapClearScore(state: Pick<RunState, 'perks'>): number {
+  return 500 + (state.perks.includes('bonus') ? 300 : 0);
+}
+
 function nextRandom(state: RunState): number {
   let x = state.rng | 0;
   x ^= x << 13; x ^= x >>> 17; x ^= x << 5;
@@ -93,13 +128,13 @@ export function draftOptions(state: RunState): PerkId[] {
 function resetBall(state: RunState): void {
   state.ball.x = state.paddleX;
   state.ball.y = 0.76;
-  const speed = (state.assist ? 0.39 : 0.44) + state.lap * (state.perks.includes('steady') ? 0.012 : 0.02);
+  const speed = launchSpeed(state);
   state.ball.vx = (nextRandom(state) > 0.5 ? 1 : -1) * speed * 0.55;
   state.ball.vy = -speed;
 }
 
 function finishLap(state: RunState): void {
-  state.score += 500 + (state.perks.includes('bonus') ? 300 : 0);
+  state.score += lapClearScore(state);
   if (state.lap >= TOTAL_LAPS) {
     state.status = 'won';
   } else {
@@ -127,10 +162,12 @@ export function stepRun(state: RunState, dt: number, direction: -1 | 0 | 1): voi
     state.lastInput = direction;
   }
   state.tick += 1;
-  const paddleSpeed = (state.assist ? 0.7 : 0.62) * (state.perks.includes('quick') ? 1.16 : 1);
-  state.paddleX = Math.max(0.11, Math.min(0.89, state.paddleX + direction * paddleSpeed * dt));
+  state.paddleX = Math.max(0.11, Math.min(0.89, state.paddleX + direction * paddleSpeed(state) * dt));
   state.elapsed += dt;
-  state.lapTime = Math.max(0, state.lapTime - dt);
+  const nextLapTime = state.lapTime - dt;
+  // Keep an exactly 60-second fixed-step lap from acquiring one extra frame
+  // through floating-point residue after 3,600 ticks.
+  state.lapTime = nextLapTime <= 1e-9 ? 0 : nextLapTime;
   if (state.lapTime <= 0) { finishLap(state); return; }
 
   const b = state.ball;
@@ -139,11 +176,11 @@ export function stepRun(state: RunState, dt: number, direction: -1 | 0 | 1): voi
   if (b.x + b.r > 1) { b.x = 1 - b.r; b.vx = -Math.abs(b.vx); }
   if (b.y - b.r < 0.06) { b.y = 0.06 + b.r; b.vy = Math.abs(b.vy); }
 
-  const paddleWidth = (state.assist ? 0.25 : 0.19) * (state.perks.includes('wide') ? 1.18 : 1);
-  if (b.vy > 0 && b.y + b.r >= 0.88 && b.y < 0.94 && Math.abs(b.x - state.paddleX) <= paddleWidth / 2 + b.r) {
+  const width = paddleWidth(state);
+  if (b.vy > 0 && b.y + b.r >= 0.88 && b.y < 0.94 && Math.abs(b.x - state.paddleX) <= width / 2 + b.r) {
     b.y = 0.88 - b.r;
-    const angle = (b.x - state.paddleX) / (paddleWidth / 2);
-    const easyAngle = state.perks.includes('magnet') ? angle * 0.7 : angle;
+    const angle = (b.x - state.paddleX) / (width / 2);
+    const easyAngle = angle * paddleAngleMultiplier(state);
     b.vx = Math.max(-0.58, Math.min(0.58, easyAngle * 0.52));
     b.vy = -Math.abs(b.vy);
   }
@@ -151,10 +188,10 @@ export function stepRun(state: RunState, dt: number, direction: -1 | 0 | 1): voi
   for (let i = state.bricks.length - 1; i >= 0; i--) {
     const brick = state.bricks[i];
     if (b.x + b.r > brick.x && b.x - b.r < brick.x + brick.w && b.y + b.r > brick.y && b.y - b.r < brick.y + brick.h) {
-      brick.hp -= brick.boss && state.perks.includes('pierce') ? 2 : 1;
+      brick.hp -= brickDamage(state, brick);
       state.hits += 1;
-      state.score += Math.round((brick.boss ? 80 : 35) * (state.perks.includes('heavy') ? 1.4 : 1));
-      if (state.perks.includes('split') && state.hits % 5 === 0) state.score += 35;
+      state.score += hitScore(state, Boolean(brick.boss));
+      state.score += splitHitBonus(state);
       b.vy *= -1;
       if (brick.hp <= 0) state.bricks.splice(i, 1);
       break;

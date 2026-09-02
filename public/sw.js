@@ -1,4 +1,4 @@
-const CACHE = 'last-lap-breakout-v3';
+const CACHE = 'last-lap-breakout-v4';
 const SHELL = ['/', '/index.html', '/favicon.svg', '/assets/orbital-breakout.webp', '/assets/share-card.jpg', '/assets/silkscreen.ttf'];
 
 self.addEventListener('install', event => {
@@ -6,7 +6,7 @@ self.addEventListener('install', event => {
     const cache = await caches.open(CACHE);
     await cache.addAll(SHELL);
     const html = await (await fetch('/')).text();
-    const builtAssets = [...html.matchAll(/(?:src|href)="(\/assets\/[^"]+)"/g)].map(match => match[1]);
+    const builtAssets = [...html.matchAll(/(?:src|href)="(\/build\/[^"]+)"/g)].map(match => match[1]);
     await cache.addAll([...new Set(builtAssets)]);
     await self.skipWaiting();
   })());

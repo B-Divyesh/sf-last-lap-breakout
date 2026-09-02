@@ -1,31 +1,73 @@
 [
   {
     "id": "finite-run",
-    "claim": "Eight fixed 60-second laps end with a result and build string.",
+    "claim": "Eight fixed 60-second laps, each of the first seven with three modifiers, end at a guarded final core with a result and build string.",
     "where": "landing page, game, README",
     "test": "npx playwright test --grep @claim:finite-run",
-    "sandbox": "fresh browser context at /demo?test=1; choose one modifier after each accelerated lap; assert the eighth-lap result"
+    "sandbox": "fresh browser context at /?test=1; start the sample, choose modifiers by key and button, and assert the eighth-lap result; the same test advances the fixed core through exactly 8 × 60 seconds"
   },
   {
     "id": "demo-sandbox",
-    "claim": "The sample run is separate and does not save real progress or settings.",
+    "claim": "The sample starts in one click, is separate from real progress and settings, and is discarded when starting for real.",
     "where": "landing action, demo banner, README",
     "test": "npx playwright test --grep @claim:demo-sandbox",
-    "sandbox": "fresh browser context at /demo; preload real settings, change demo settings, and assert only demo-prefixed session keys are read or written"
+    "sandbox": "fresh browser context from /; preload real settings, enter the sample in one click, change demo settings, reset, start for real, and assert only demo-prefixed session keys changed or were removed"
+  },
+  {
+    "id": "assist-mode",
+    "claim": "Assist mode starts the next run with a wider paddle, slower orb, and one more hull point.",
+    "where": "landing facts, Game settings, README",
+    "test": "npx playwright test --grep @claim:assist-mode",
+    "sandbox": "fresh demo context; save Assist mode, assert isolated persistence, and measure the shared gameplay values for paddle width, launch speed, and hull"
+  },
+  {
+    "id": "modifier-effects",
+    "claim": "Every modifier card has the precise effect stated on it.",
+    "where": "modifier cards, README",
+    "test": "npx playwright test --grep @claim:modifier-effects",
+    "sandbox": "fresh demo context; assert each card's exact copy and exercise the shared game calculations for width, speed, score, split, hull, magnet, drill, bonus, and steady effects"
+  },
+  {
+    "id": "key-remapping",
+    "claim": "Game settings add J/L or H/K movement keys and Escape pause while arrow keys and A/D remain available.",
+    "where": "Game settings, README",
+    "test": "npx playwright test --grep @claim:key-remapping",
+    "sandbox": "fresh real-run context; save each mapping, use J/L, H/K, ArrowLeft, and Escape on the playfield, and assert the selected controls receive the three-pixel focus ring"
+  },
+  {
+    "id": "deterministic-build",
+    "claim": "The same sample choices produce the same build string.",
+    "where": "README, result screen",
+    "test": "npx playwright test --grep @claim:deterministic-build",
+    "sandbox": "fresh demo context at /demo?test=1; finish the same seeded run twice with the same choices and compare result strings"
+  },
+  {
+    "id": "copy-build",
+    "claim": "A completed run's build string can be copied.",
+    "where": "result screen",
+    "test": "npx playwright test --grep @claim:copy-build",
+    "sandbox": "fresh demo context at /demo?test=1; finish the run, activate Copy build string, and assert the success message"
+  },
+  {
+    "id": "hull-loss",
+    "claim": "Each missed orb costs one hull point, and zero hull ends the run.",
+    "where": "landing guide, game",
+    "test": "npx playwright test --grep @claim:hull-loss",
+    "sandbox": "fresh demo context plus deterministic core state; force four missed orbs and assert each hull decrement and the loss state"
   },
   {
     "id": "input-parity",
     "claim": "Keyboard and touch controls both move the paddle.",
     "where": "landing facts, game help, README",
     "test": "npx playwright test --grep @claim:input-parity",
-    "sandbox": "fresh browser context at /play; move right by keyboard and left by the on-screen touch control"
+    "sandbox": "fresh 390px browser context at /play; move right by keyboard and left by the on-screen touch control"
   },
   {
     "id": "local-recovery",
     "claim": "Run progress and settings persist in this browser.",
     "where": "game guide, privacy page, README",
     "test": "npx playwright test --grep @claim:local-recovery",
-    "sandbox": "fresh browser context at /play; wait for save, change a setting, reload, and assert both local records"
+    "sandbox": "fresh browser context at /play; wait for a progress save, change a setting, reload, and assert the persisted records"
   },
   {
     "id": "best-result",
@@ -36,23 +78,30 @@
   },
   {
     "id": "frame-rate",
-    "claim": "The game maintains 60 fps on a mid-range phone, measured at 390px in the browser test.",
+    "claim": "The game maintains a 60 fps frame cadence on a 390px mid-range phone simulation.",
     "where": "README",
     "test": "npx playwright test --grep @claim:frame-rate",
-    "sandbox": "fresh 390px browser context at /demo; record 180 requestAnimationFrame intervals and assert 14–18 ms mean with p95 at or below 22 ms"
+    "sandbox": "fresh 390px touch/mobile browser context at /demo with 4× CPU throttling; record 180 requestAnimationFrame intervals and assert 14–18 ms mean with p95 at or below 22 ms"
   },
   {
     "id": "local-privacy",
-    "claim": "The game has no account, ads, analytics, or personal-data requests.",
-    "where": "landing facts, privacy page, README",
+    "claim": "The game has no account, purchases, ads, analytics, or personal-data requests.",
+    "where": "landing facts, privacy page, terms, README",
     "test": "npx playwright test --grep @claim:local-privacy",
-    "sandbox": "record every request during a fresh demo flow and assert that every origin is the product origin"
+    "sandbox": "record every request during a fresh demo flow, assert same-origin game files only, and assert there are no account, checkout, payment, external-form, or iframe controls"
   },
   {
     "id": "offline-reload",
     "claim": "The game reloads offline after the first visit.",
     "where": "landing page, README",
     "test": "npx playwright test --grep @claim:offline-reload",
-    "sandbox": "new browser context at /demo; wait for service worker, reload online once, set context offline, then reload and assert the game heading"
+    "sandbox": "new browser context at /demo; wait for the service worker, reload online once, set the context offline, then reload and assert the game heading"
+  },
+  {
+    "id": "reduced-motion",
+    "claim": "Reduced-motion settings override screen movement.",
+    "where": "Game settings",
+    "test": "npx playwright test --grep @claim:reduced-motion",
+    "sandbox": "fresh browser context with prefers-reduced-motion enabled; assert the preference matches and UI transitions reduce to 0.01 ms"
   }
 ]

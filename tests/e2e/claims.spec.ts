@@ -57,7 +57,7 @@ test('@claim:finite-run a title-screen sample reaches the eighth-lap result', as
   await page.getByRole('link', { name: 'Try it with sample data' }).click();
   await expect(page).toHaveURL(/\/demo\?test=1$/);
   await finishAcceleratedRun(page);
-  await expect(page.getByLabel('Build string')).toHaveValue('LLB-7B4T5S-CEBQHDW-0SBRZTA');
+  await expect(page.getByLabel('Build code')).toHaveValue('LLB-7B4T5S-CEBQHDW-0SBRZTA');
 });
 
 test('@claim:demo-sandbox demo is marked and uses a separate namespace', async ({ page }) => {
@@ -184,21 +184,37 @@ test('@claim:key-remapping keyboard settings add J/L and H/K movement plus Escap
   expect(Number(await canvas.getAttribute('data-paddle'))).toBeGreaterThan(afterH);
 });
 
-test('@claim:deterministic-build identical sample choices produce an identical build string', async ({ page }) => {
+test('@claim:deterministic-build identical sample choices produce an identical build code', async ({ page }) => {
   await page.goto('/demo?test=1');
   await finishAcceleratedRun(page);
-  const first = await page.getByLabel('Build string').inputValue();
+  const first = await page.getByLabel('Build code').inputValue();
   await page.getByRole('button', { name: 'Start another run' }).click();
   await finishAcceleratedRun(page);
-  expect(await page.getByLabel('Build string').inputValue()).toBe(first);
+  expect(await page.getByLabel('Build code').inputValue()).toBe(first);
 });
 
-test('@claim:copy-build a result build string can be copied', async ({ page }) => {
+test('@claim:copy-build a result build code can be copied', async ({ page, browser }) => {
   await page.context().grantPermissions(['clipboard-read', 'clipboard-write'], { origin: 'http://127.0.0.1:4173' });
   await page.goto('/demo?test=1');
   await finishAcceleratedRun(page);
-  await page.getByRole('button', { name: 'Copy build string' }).click();
-  await expect(page.locator('[data-copy-status]')).toHaveText('Build string copied.');
+  const displayedCode = await page.getByLabel('Build code').inputValue();
+  await page.getByRole('button', { name: 'Copy build code' }).click();
+  await expect(page.locator('[data-copy-status]')).toHaveText('Build code copied.');
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(displayedCode);
+
+  const deniedContext = await browser.newContext();
+  const deniedPage = await deniedContext.newPage();
+  await deniedPage.addInitScript(() => {
+    Object.defineProperty(navigator.clipboard, 'writeText', {
+      configurable: true,
+      value: () => Promise.reject(new DOMException('Permission denied', 'NotAllowedError'))
+    });
+  });
+  await deniedPage.goto('/demo?test=1');
+  await finishAcceleratedRun(deniedPage);
+  await deniedPage.getByRole('button', { name: 'Copy build code' }).click();
+  await expect(deniedPage.locator('[data-copy-status]')).toHaveText('Copy failed. Select the build code instead.');
+  await deniedContext.close();
 });
 
 test('a deterministic loss reaches its end screen and restart resets the run', async ({ page }) => {
@@ -327,7 +343,7 @@ test('@claim:best-result a completed real run saves its best result through relo
   }
   await expect(page.getByRole('heading', { name: 'Run complete' })).toBeVisible();
   const shownScore = await page.locator('.result-score').textContent();
-  const shownBuild = await page.getByLabel('Build string').inputValue();
+  const shownBuild = await page.getByLabel('Build code').inputValue();
   await expect(page.locator('[data-best-result]')).toContainText('Best result saved');
   const beforeReload = await page.evaluate(() => localStorage.getItem('last-lap-breakout:best:v1'));
   expect(beforeReload).toBeTruthy();
@@ -397,11 +413,24 @@ test('@claim:offline-reload the game reloads offline after the first visit', asy
   await context.close();
 });
 
-test('@claim:reduced-motion the game honors the browser reduced-motion preference', async ({ page }) => {
+test('@claim:reduced-motion the game stops star drift and screen shake with reduced motion', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/play');
+  await page.goto('/play?test=hit');
   expect(await page.locator('.button').first().evaluate(element => Number.parseFloat(getComputedStyle(element).transitionDuration))).toBeLessThanOrEqual(0.00001);
   expect(await page.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches)).toBe(true);
+  const canvas = page.locator('canvas');
+  await expect.poll(async () => Number(await canvas.getAttribute('data-hits'))).toBeGreaterThan(0);
+  const starOffsets = await page.evaluate(async () => {
+    const values: string[] = [];
+    for (let frame = 0; frame < 30; frame++) {
+      values.push(document.querySelector('canvas')?.dataset.starOffset || '');
+      await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+    }
+    return values;
+  });
+  expect(new Set(starOffsets)).toEqual(new Set(['0.000']));
+  await expect(page.locator('.game-shell')).not.toHaveClass(/is-shaking/);
+  await expect(page.locator('.game-shell')).toHaveAttribute('data-shake-count', '0');
 });
 
 test('opening Game settings freezes active play until the dialog closes', async ({ page }) => {
@@ -440,7 +469,7 @@ test('the immutable cache route targets only Vite hashed build files', async ({ 
     const value = node instanceof HTMLLinkElement ? node.href : (node as HTMLScriptElement).src;
     return new URL(value).pathname;
   }));
-  expect(hashedFiles).toHaveLength(2);
+  expect(hashedFiles).toHaveLength(3);
   expect(hashedFiles.every(path => /^\/build\/(?:main|style)-[A-Za-z0-9_-]+\.(?:js|css)$/.test(path))).toBe(true);
 });
 
@@ -460,6 +489,8 @@ test('history routes, metadata, and the mobile layout work', async ({ page }) =>
   await expect(page).toHaveTitle('Last Lap Breakout — finish eight arcade laps');
   await page.getByRole('link', { name: 'Privacy' }).first().click();
   await expect(page).toHaveTitle('Privacy — Last Lap Breakout');
+  await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', 'Privacy — Last Lap Breakout');
+  await expect(page.locator('meta[name="twitter:title"]')).toHaveAttribute('content', 'Privacy — Last Lap Breakout');
   await page.goBack();
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Finish a Breakout run in eight minutes');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -479,6 +510,16 @@ test('history routes, metadata, and the mobile layout work', async ({ page }) =>
     const box = await target.boundingBox();
     expect(box?.width).toBeGreaterThanOrEqual(44);
     expect(box?.height).toBeGreaterThanOrEqual(44);
+  }
+  for (const [path, title] of [
+    ['/demo/index.html', 'Demo — Last Lap Breakout'],
+    ['/play/index.html', 'Play — Last Lap Breakout'],
+    ['/privacy/index.html', 'Privacy — Last Lap Breakout'],
+    ['/terms/index.html', 'Terms — Last Lap Breakout']
+  ]) {
+    const html = await (await page.request.get(path)).text();
+    expect(html).toContain(`<meta property="og:title" content="${title}"`);
+    expect(html).toContain(`<meta name="twitter:title" content="${title}"`);
   }
 });
 
@@ -503,6 +544,10 @@ test('the standalone not-found document has the designed 404 page', async ({ pag
   const response = await page.goto('/404.html');
   expect(response?.status()).toBe(200);
   await expect(page).toHaveTitle('Page not found — Last Lap Breakout');
+  await expect(page.locator('meta[property="og:title"]')).toHaveAttribute('content', 'Page not found — Last Lap Breakout');
+  await expect(page.locator('meta[property="og:description"]')).toHaveAttribute('content', 'The requested Last Lap Breakout page was not found.');
+  await expect(page.locator('meta[name="twitter:title"]')).toHaveAttribute('content', 'Page not found — Last Lap Breakout');
+  await expect(page.locator('meta[name="twitter:description"]')).toHaveAttribute('content', 'The requested Last Lap Breakout page was not found.');
   await expect(page.getByRole('heading', { name: 'This lap does not exist' })).toBeVisible();
 });
 

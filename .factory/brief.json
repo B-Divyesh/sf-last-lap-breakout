@@ -1,7 +1,7 @@
 {
   "slug": "last-lap-breakout",
   "title": "Last Lap Breakout",
-  "summary": "Finish an eight-minute Breakout run with a new build each lap.",
+  "summary": "Finish an eight-minute Breakout run by choosing seven modifiers.",
   "artifact_class": "browser-game",
   "session": "Eight fixed 60-second laps, followed by a final result.",
   "monetization": "free"

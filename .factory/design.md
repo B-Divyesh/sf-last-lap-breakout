@@ -31,7 +31,7 @@ The signature motion is a slow horizontal star drift behind active play. The lan
 
 ## Game feel and difficulty
 
-The fixed-step simulation runs at 60 Hz. Each lap lasts 60 seconds. Early laps use broad formations and a forgiving ball speed. Later laps add armored bricks and speed pressure. Lap eight uses a moving shielded core that opens after its guard bricks break. Missing the orb costs one hull point; zero hull ends the run. Assist mode widens the paddle, slows the orb, and adds one hull point. Every reward draft offers three readable modifiers from a deterministic seeded pool.
+The fixed-step simulation runs at 60 Hz. Each lap lasts 60 seconds. Early laps use broad formations and a forgiving ball speed. Later laps add armored bricks and speed pressure. Lap eight uses a moving shielded core that opens after its guard bricks break. Missing the orb costs one hull point; zero hull ends the run. Assist mode widens the paddle, slows the orb, and adds one hull point. After each of the first seven laps, players choose one of three readable modifiers from a deterministic pool.
 
 ## Asset plan and provenance
 

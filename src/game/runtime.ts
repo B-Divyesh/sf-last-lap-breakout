@@ -133,8 +133,17 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
   const testParams = new URLSearchParams(location.search);
   const isLocalTest = ['127.0.0.1', 'localhost'].includes(location.hostname) && testParams.has('test');
   const lossTest = isLocalTest && testParams.get('test') === 'loss';
-  const testSpeed = isLocalTest && !lossTest ? 1200 : 1;
+  const hitTest = isLocalTest && testParams.get('test') === 'hit';
+  const testSpeed = isLocalTest && !lossTest && !hitTest ? 1200 : 1;
   let lossScenarioComplete = false;
+
+  // This local-only check starts the ordinary fixed-step simulation one
+  // frame before a brick collision. It makes the reduced-motion regression
+  // test observe a real hit without changing a deployed run.
+  if (hitTest) {
+    const target = state.bricks[0];
+    state.ball = { x: target.x + target.w / 2, y: target.y + target.h + 0.016, vx: 0, vy: -0.4, r: 0.014 };
+  }
 
   host.innerHTML = `
     <section class="game-shell ${preview ? 'game-preview' : ''}" aria-label="Last Lap Breakout game">
@@ -220,7 +229,7 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
       if (!demo && won) saveBestResult(state);
       const best = !demo ? readBestResult() : null;
       const bestText = best ? `<p class="best-result" data-best-result>Best result saved: ${best.score.toLocaleString()} points</p>` : '';
-      overlay.innerHTML = `<div class="overlay-panel result-panel"><p class="eyebrow">${won ? 'Eight laps complete' : `Run ended on lap ${state.lap}`}</p><h2>${won ? 'Run complete' : 'Hull depleted'}</h2><p class="result-score">${state.score.toLocaleString()} points</p>${bestText}<label for="build-code">Build string</label><input id="build-code" readonly value="${share}" /><div class="result-actions"><button class="button" type="button" data-copy>Copy build string</button><button class="button button-quiet" type="button" data-restart>Start another run</button></div><p data-copy-status aria-live="polite"></p></div>`;
+      overlay.innerHTML = `<div class="overlay-panel result-panel"><p class="eyebrow">${won ? 'Eight laps complete' : `Run ended on lap ${state.lap}`}</p><h2>${won ? 'Run complete' : 'Hull depleted'}</h2><p class="result-score">${state.score.toLocaleString()} points</p>${bestText}<label for="build-code">Build code</label><input id="build-code" readonly value="${share}" /><div class="result-actions"><button class="button" type="button" data-copy>Copy build code</button><button class="button button-quiet" type="button" data-restart>Start another run</button></div><p data-copy-status aria-live="polite"></p></div>`;
       status.textContent = won ? `Run complete with ${state.score} points.` : `Run ended on lap ${state.lap}.`;
       eraseRun(storageKey, demo);
     }
@@ -230,8 +239,10 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
     const w = canvas.width, h = canvas.height;
     context.fillStyle = '#080a16'; context.fillRect(0, 0, w, h);
     context.fillStyle = '#10152a';
+    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const starOffset = reduceMotion ? 0 : state.elapsed * (preview ? 8 : 2);
     for (let i = 0; i < 55; i++) {
-      const x = ((i * 173 + state.elapsed * (preview ? 8 : 2)) % w);
+      const x = ((i * 173 + starOffset) % w);
       const y = (i * 251) % h;
       context.fillRect(x, y, i % 3 === 0 ? 3 : 2, i % 3 === 0 ? 3 : 2);
     }
@@ -259,6 +270,8 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
     }
     canvas.dataset.paddle = state.paddleX.toFixed(3);
     canvas.dataset.tick = String(state.tick);
+    canvas.dataset.hits = String(state.hits);
+    canvas.dataset.starOffset = starOffset.toFixed(3);
   }
 
   function setPaused(paused: boolean): void {
@@ -303,6 +316,7 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
           shell.classList.remove('is-shaking');
           requestAnimationFrame(() => shell.classList.add('is-shaking'));
           setTimeout(() => shell.classList.remove('is-shaking'), 130);
+          shell.dataset.shakeCount = String(Number(shell.dataset.shakeCount || '0') + 1);
         }
         lastHits = state.hits;
       }
@@ -343,8 +357,8 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
       state = createRun(demo ? 0x1a57d3a0 : Date.now(), settings.assist); showOverlay(); canvas.focus();
     }
     if (target.dataset.copy !== undefined) {
-      try { await navigator.clipboard.writeText(buildString(state)); host.querySelector<HTMLElement>('[data-copy-status]')!.textContent = 'Build string copied.'; }
-      catch { host.querySelector<HTMLElement>('[data-copy-status]')!.textContent = 'Copy failed. Select the build string instead.'; }
+      try { await navigator.clipboard.writeText(buildString(state)); host.querySelector<HTMLElement>('[data-copy-status]')!.textContent = 'Build code copied.'; }
+      catch { host.querySelector<HTMLElement>('[data-copy-status]')!.textContent = 'Copy failed. Select the build code instead.'; }
     }
     if (target.dataset.settings !== undefined) openSettings();
   });
@@ -370,6 +384,7 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
   const onSettings = (event: Event): void => { Object.assign(settings, (event as CustomEvent<Settings>).detail); };
   document.addEventListener('llb-settings', onSettings);
   settingsDialog?.addEventListener('close', onSettingsClose);
+  shell.dataset.shakeCount = '0';
   syncHud(); draw(); raf = requestAnimationFrame(loop);
 
   return () => {

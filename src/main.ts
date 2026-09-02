@@ -5,9 +5,9 @@ const app = document.querySelector<HTMLDivElement>('#app')!;
 let disposeGame: (() => void) | undefined;
 
 const routeData: Record<string, { title: string; description: string }> = {
-  '/': { title: 'Last Lap Breakout — finish eight arcade laps', description: 'Play eight fixed Breakout laps, choose a modifier after each lap, and finish with a shareable build.' },
-  '/play': { title: 'Play — Last Lap Breakout', description: 'Play a complete eight-lap Breakout run.' },
-  '/demo': { title: 'Demo — Last Lap Breakout', description: 'Try a seeded Last Lap Breakout run without saving real progress.' },
+  '/': { title: 'Last Lap Breakout — finish eight arcade laps', description: 'Play eight fixed Breakout laps, choose modifiers after the first seven, and finish with a build code.' },
+  '/play': { title: 'Play — Last Lap Breakout', description: 'Play a complete eight-lap Breakout run and finish with a build code.' },
+  '/demo': { title: 'Demo — Last Lap Breakout', description: 'Try a sample Last Lap Breakout run without saving real progress.' },
   '/privacy': { title: 'Privacy — Last Lap Breakout', description: 'How Last Lap Breakout stores game progress on your device.' },
   '/terms': { title: 'Terms — Last Lap Breakout', description: 'Terms for playing Last Lap Breakout.' },
   '/404': { title: 'Page not found — Last Lap Breakout', description: 'The requested Last Lap Breakout page was not found.' }
@@ -52,10 +52,10 @@ function homePage(): string {
       <div class="hero-copy">
         <p class="eyebrow">One run · Eight laps</p>
         <h1 tabindex="-1">Finish a Breakout run in eight minutes</h1>
-        <p class="hero-intro">For short breaks: clear eight fixed laps, choose a modifier each lap, and finish with a shareable build.</p>
+        <p class="hero-intro">For short breaks: clear eight fixed laps, choose modifiers after the first seven, and finish with a build code.</p>
         <div class="hero-actions">
           <a class="button" href="/demo" data-link>Try it with sample data</a>
-          <span>A seeded run starts immediately.</span>
+          <span>A sample run starts immediately.</span>
         </div>
         <a class="text-action" href="/play" data-link>${hasSavedRun() ? 'Resume your saved run' : 'Start a new run'}</a>
         <ul class="plain-facts" aria-label="Game facts">
@@ -77,8 +77,8 @@ function homePage(): string {
       <div><p class="eyebrow">How it works</p><h2>Every run reaches a clear ending</h2></div>
       <ol class="steps">
         <li><span>01</span><div><h3>Keep the orb alive</h3><p>Move the paddle. Break formations for 60 seconds. A miss costs one hull point.</p></div></li>
-        <li><span>02</span><div><h3>Choose one modifier</h3><p>Pick one of three changes after each lap. Your choices shape the final build.</p></div></li>
-        <li><span>03</span><div><h3>Face the final core</h3><p>Lap eight has a guarded core. Survive it to get your score and build string.</p></div></li>
+        <li><span>02</span><div><h3>Choose one modifier</h3><p>After each of the first seven laps, choose one of three modifiers. Your choices form the build code.</p></div></li>
+        <li><span>03</span><div><h3>Face the final core</h3><p>Lap eight has a guarded core. Survive it to get your score and build code.</p></div></li>
       </ol>
     </section>
 
@@ -93,7 +93,7 @@ function homePage(): string {
 function gamePage(demo: boolean): string {
   return `${demo ? `<aside class="demo-banner" aria-label="Demo mode"><strong>Demo — sample data, nothing is saved</strong><div><button type="button" data-reset-demo>Reset demo</button><a href="/play" data-real data-link>Start for real</a></div></aside>` : ''}
     ${header()}<main id="main" class="play-main">
-      <section class="play-heading"><div><p class="eyebrow">${demo ? 'Seeded sample run' : 'Your local run'}</p><h1 tabindex="-1">Play an eight-lap Breakout run</h1></div><p>Move the paddle, protect your hull, and choose a modifier after each lap.</p></section>
+      <section class="play-heading"><div><p class="eyebrow">${demo ? 'Sample run' : 'Your local run'}</p><h1 tabindex="-1">Play an eight-lap Breakout run</h1></div><p>Move the paddle, protect your hull, and choose a modifier after the first seven laps.</p></section>
       <div class="game-layout"><div id="game-root"></div><aside class="run-guide"><p class="eyebrow">Run route</p><ol>${Array.from({ length: 8 }, (_, i) => `<li${i === 7 ? ' class="boss"' : ''}><span>${String(i + 1).padStart(2, '0')}</span>${i === 7 ? 'Final core' : '60-second lap'}</li>`).join('')}</ol><p>Progress saves after each second. Refresh to return to the same lap.</p></aside></div>
     </main>${footer()}${settingsDialog()}`;
 }
@@ -122,6 +122,10 @@ function render(announce = false): void {
   document.title = data.title;
   document.querySelector<HTMLMetaElement>('meta[name="description"]')!.content = data.description;
   document.querySelector<HTMLLinkElement>('link[rel="canonical"]')!.href = `https://last-lap-breakout.sociobot.in${path === '/' ? '/' : path}`;
+  document.querySelector<HTMLMetaElement>('meta[property="og:title"]')!.content = data.title;
+  document.querySelector<HTMLMetaElement>('meta[property="og:description"]')!.content = data.description;
+  document.querySelector<HTMLMetaElement>('meta[name="twitter:title"]')!.content = data.title;
+  document.querySelector<HTMLMetaElement>('meta[name="twitter:description"]')!.content = data.description;
   app.innerHTML = path === '/' ? homePage() : path === '/play' ? gamePage(false) : path === '/demo' ? gamePage(true) : path === '/privacy' ? privacyPage() : path === '/terms' ? termsPage() : notFoundPage();
 
   if (path === '/') disposeGame = mountGame(document.querySelector<HTMLElement>('#preview-game')!, { preview: true });

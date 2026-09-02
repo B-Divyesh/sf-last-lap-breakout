@@ -1,8 +1,8 @@
 # Last Lap Breakout
 
-Finish an eight-minute Breakout run with a new build each lap.
+Finish an eight-minute Breakout run by choosing seven modifiers.
 
-Last Lap Breakout is a free browser game for people taking a short break. Every run has eight 60-second laps. A three-choice modifier draft follows each of the first seven laps. The eighth lap is a guarded core battle, then the game gives you a score and deterministic build string.
+Last Lap Breakout is a free browser game for people taking a short break. Every run has eight 60-second laps. After each of the first seven laps, choose one of three modifiers. The eighth lap is a guarded core battle. It ends with a score and build code.
 
 Play the isolated sample at `/demo` or `https://last-lap-breakout.sociobot.in/demo`. It starts in one click and does not write to real-run storage.
 
@@ -33,11 +33,11 @@ npm test
 npm run build
 ```
 
-The test suite covers deterministic simulation, the full eight-lap result path, best-result reload persistence, keyboard, touch, playfield drag and P pause input, remapped keys, demo isolation, restored run progress, privacy, frame cadence, mobile layout, routes, and accessibility. The production build lands in `dist/` with `index.html` and `404.html` at its root.
+Tests cover the game loop, controls, demo separation, saved runs, privacy, routes, layout, performance, and accessibility. The production build lands in `dist/` with `index.html` and `404.html` at its root.
 
 ## Data and privacy
 
-The app has no account, purchases, analytics, ads, or third-party runtime requests. A real run, its settings, and the highest completed result use local storage. The demo uses separate `demo:` session storage keys for both progress and settings and never saves a best result. The game reloads offline after the first visit. At 390px with 4× CPU throttling, the frame test requires a 14–18 ms median and a 90th-percentile interval no slower than 34 ms. See `/privacy` and [.factory/demo.md](.factory/demo.md) for details.
+The app has no account, purchases, analytics, ads, or third-party runtime requests. A real run, its settings, and the highest completed result use local storage. The demo uses separate `demo:` session storage keys for both progress and settings and never saves a best result. The game reloads offline after the first visit. The frame test uses a 390 px viewport with 4× CPU throttling. It requires a 14–18 ms median and a 90th percentile no slower than 34 ms. See `/privacy` and [.factory/demo.md](.factory/demo.md) for details.
 
 ## Deployment
 

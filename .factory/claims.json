@@ -1,7 +1,7 @@
 [
   {
     "id": "finite-run",
-    "claim": "Eight fixed 60-second laps, each of the first seven with three modifiers, end at a guarded final core with a result and build string.",
+    "claim": "Eight fixed 60-second laps, each of the first seven with three modifiers, end at a guarded final core with a result and build code.",
     "where": "landing page, game, README",
     "test": "npx playwright test --grep @claim:finite-run",
     "sandbox": "fresh browser context at /?test=1; start the sample, choose modifiers by key and button, and assert the eighth-lap result; the same test advances the fixed core through exactly 8 × 60 seconds"
@@ -36,17 +36,17 @@
   },
   {
     "id": "deterministic-build",
-    "claim": "The same sample choices produce the same build string.",
+    "claim": "The same sample choices produce the same build code.",
     "where": "README, result screen",
     "test": "npx playwright test --grep @claim:deterministic-build",
-    "sandbox": "fresh demo context at /demo?test=1; finish the same seeded run twice with the same choices and compare result strings"
+    "sandbox": "fresh demo context at /demo?test=1; finish the same seeded run twice with the same choices and compare build codes"
   },
   {
     "id": "copy-build",
-    "claim": "A completed run's build string can be copied.",
+    "claim": "A completed run's build code can be copied.",
     "where": "result screen",
     "test": "npx playwright test --grep @claim:copy-build",
-    "sandbox": "fresh demo context at /demo?test=1; finish the run, activate Copy build string, and assert the success message"
+    "sandbox": "fresh demo context at /demo?test=1; finish the run, activate Copy build code, read the browser clipboard, compare it with the displayed code, and verify the denied-permission fallback"
   },
   {
     "id": "hull-loss",
@@ -123,6 +123,6 @@
     "claim": "Reduced-motion settings override screen movement.",
     "where": "Game settings",
     "test": "npx playwright test --grep @claim:reduced-motion",
-    "sandbox": "fresh browser context with prefers-reduced-motion enabled; assert the preference matches and UI transitions reduce to 0.01 ms"
+    "sandbox": "fresh browser context with prefers-reduced-motion enabled; cause a real brick hit, assert star positions remain fixed, no shake is recorded, and UI transitions reduce to 0.01 ms"
   }
 ]

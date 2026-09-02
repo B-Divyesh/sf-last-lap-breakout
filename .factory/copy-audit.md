@@ -1,14 +1,14 @@
 # Landing copy audit
 
-Audited on 2026-09-01. Counts treat numbers and hyphenated terms as one word. No line exceeds 22 words. No banned word appears.
+Audited on 2026-09-02. Counts treat numbers and hyphenated terms as one word. No line exceeds 22 words. No banned word appears.
 
 | Landing text | Words | Result |
 | --- | ---: | --- |
 | One run. Eight laps. | 4 | Pass |
 | Finish a Breakout run in eight minutes. | 7 | Pass |
-| For short breaks: clear eight fixed laps, choose a modifier each lap, and finish with a shareable build. | 18 | Pass |
+| For short breaks: clear eight fixed laps, choose modifiers after the first seven, and finish with a build code. | 18 | Pass |
 | Try it with sample data. | 5 | Pass |
-| A seeded run starts immediately. | 5 | Pass |
+| A sample run starts immediately. | 5 | Pass |
 | Start a new run. | 5 | Pass |
 | Eight times 60 seconds. | 4 | Pass |
 | Then the run ends. | 4 | Pass |
@@ -22,11 +22,11 @@ Audited on 2026-09-01. Counts treat numbers and hyphenated terms as one word. No
 | Break formations for 60 seconds. | 5 | Pass |
 | A miss costs one hull point. | 6 | Pass |
 | Choose one modifier. | 3 | Pass |
-| Pick one of three changes after each lap. | 8 | Pass |
-| Your choices shape the final build. | 6 | Pass |
+| After each of the first seven laps, choose one of three modifiers. | 12 | Pass |
+| Your choices form the build code. | 6 | Pass |
 | Face the final core. | 4 | Pass |
 | Lap eight has a guarded core. | 6 | Pass |
-| Survive it to get your score and build string. | 9 | Pass |
+| Survive it to get your score and build code. | 9 | Pass |
 | What this game does not do. | 6 | Pass |
 | Your run and settings stay in this browser. | 8 | Pass |
 | The game reloads offline after your first visit. | 8 | Pass |
@@ -40,5 +40,5 @@ Audited on 2026-09-01. Counts treat numbers and hyphenated terms as one word. No
 | Ball | orb |
 | Life counter | hull |
 | Post-lap power choice | modifier |
-| Reproducible result code | build string |
-| Isolated try-out | demo |
+| Reproducible result code | build code |
+| Isolated try-out | sample demo |

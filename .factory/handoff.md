@@ -1,22 +1,46 @@
-# Last Lap Breakout review 1 handoff
+# Last Lap Breakout polish 1 handoff
 
-## Decision: FAIL
+## Delivered
 
-Adversarial review 1 was completed against commit `1cc130a42923137f8b0635a22bf77afedff3a4fb` and the live production URL. No product code was changed.
+Polish round 1 repairs every finding in `review-1.md` on commits `84550899ea04ef2e4e649e3e030e8527a83c84cc` and `6fbe97b03fe90fcfb505d4ac0750e55664f17674`.
 
-The full report is in [review-1.md](review-1.md). It records three blocking findings and six lower-severity findings. The blockers are an under-specified clipboard claim test, decorative star movement that continues under reduced motion, and live copy that promises a modifier after every lap although the game provides modifiers only after laps 1–7.
+- The first screen now accurately says modifiers follow the first seven laps and consistently calls the result a **build code**.
+- `?demo=1` is the one-click, isolated sample URL. It has the persistent banner, Reset demo, Start for real, and only uses `demo:last-lap-breakout:*` session keys. `/demo` remains a direct route to the same sandbox.
+- The clipboard claim reads the actual browser clipboard and checks the denied-permission fallback.
+- Reduced motion freezes decorative star drift and suppresses shake after a real collision.
+- Direct `/demo`, `/play`, `/privacy`, and `/terms` requests ship their own route-correct Open Graph and Twitter metadata. The designed 404 now has the same metadata set.
 
-## Verification performed
+## Verification
 
-- All 18 exact `.factory/claims.json` commands: executable PASS from a clean clone; two have inadequate assertions as documented.
-- `npm test`: PASS — 6 unit tests and 27 Playwright tests.
-- `npm run build`: PASS — `dist/` is 318,397 bytes.
-- Fresh 390 × 844 and 1440 × 900 cold reads.
-- Live one-click demo, reset, exit, namespace isolation, same-origin request log, and full seven-draft result flow.
-- Live route/status/metadata/internal-link crawl, History API focus and scroll restoration, and designed HTTP 404.
-- Playwright Axe on six routes at mobile and desktop sizes: zero violations.
-- Mobile Lighthouse: 99 performance, 100 accessibility, 100 best practices, 100 SEO.
+Final clean clone: `/tmp/last-lap-breakout-final.SkBH66/repo` at `6fbe97b`.
 
-## Next steps
+- `npm ci`: passed with no vulnerabilities.
+- All 18 exact commands declared by `.factory/claims.json`: passed independently from the clean clone.
+- `npm test`: passed — 6 deterministic unit tests and 27 Chromium browser tests.
+- `npm run build`: passed. `dist/` is 326,439 bytes; main JS is 28.06 kB raw / 10.18 kB gzip.
+- Live deployment: `https://last-lap-breakout.sociobot.in` (Static Web App deployment `83431440-73a7-4637-acb8-0d7c765e2574`) returned HTTPS 200.
+- `/opt/fleet/lib/verify-url.sh` passed on the live root and `https://last-lap-breakout.sociobot.in/?demo=1`: title, language, main landmark, image alt attributes, button labels, and console checks passed.
+- Live Playwright Axe checks found zero serious or critical WCAG 2 A/AA issues on `/`, `/demo`, `/play`, `/privacy`, `/terms`, and the designed 404 at 390 × 844.
+- Cold live checks confirmed route titles/social tags, static deep-link metadata, `?demo=1` banner/reset/exit isolation, reduced-motion fixed star offset, and no page errors on valid routes.
 
-Fix F-1-1 through F-1-9 without weakening the claims. Then rerun the commands and checks listed in the review. There are no deployment or infrastructure actions in this work order.
+Evidence screenshots:
+
+- `.factory/evidence/polish-1/live-home-mobile.png`
+- `.factory/evidence/polish-1/live-demo-mobile.png`
+- `.factory/evidence/polish-1/screenshot-desktop.png`
+- `.factory/evidence/polish-1/screenshot-mobile.png`
+
+## Run locally
+
+```sh
+npm install
+npm run dev
+npm test
+npm run build
+```
+
+Use `http://localhost:4173/?demo=1` for the isolated sample game.
+
+## Known gaps
+
+None.

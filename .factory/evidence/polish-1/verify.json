@@ -1,0 +1,14 @@
+{
+  "url": "https://last-lap-breakout.sociobot.in",
+  "loadMs": 655,
+  "errors": [],
+  "a11y": {
+    "title": "Last Lap Breakout — finish eight arcade laps",
+    "lang": "en",
+    "h1": 1,
+    "main": true,
+    "imgsMissingAlt": 0,
+    "buttonsUnlabeled": 0,
+    "textLength": 1144
+  }
+}

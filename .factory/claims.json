@@ -102,7 +102,7 @@
     "claim": "The game keeps a 14–18 ms median frame interval and a 90th-percentile interval no slower than 34 ms on a 390px mid-range phone simulation.",
     "where": "README",
     "test": "npx playwright test --grep @claim:frame-rate",
-    "sandbox": "fresh 390px touch/mobile browser context at /demo with 4× CPU throttling; wait for page resources and an idle turn, discard 180 warm-up frames, record 900 requestAnimationFrame intervals, and assert a 14–18 ms nearest-rank median plus p90 at or below 34 ms"
+    "sandbox": "fresh 390px touch/mobile browser context at /demo with 4× CPU throttling; wait for page resources and an idle turn, use a held pointer to follow the visible orb, discard 180 warm-up frames, record 900 playing-state requestAnimationFrame intervals, and assert a 14–18 ms nearest-rank median plus p90 at or below 34 ms"
   },
   {
     "id": "local-privacy",

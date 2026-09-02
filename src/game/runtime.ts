@@ -6,6 +6,10 @@ const SETTINGS_KEY = 'last-lap-breakout:settings:v1';
 const DEMO_SETTINGS_KEY = 'demo:last-lap-breakout:settings:v1';
 const BEST_RESULT_KEY = 'last-lap-breakout:best:v1';
 const AUTOSAVE_INTERVAL_MS = 1000;
+// This is a pixel-art game, so a capped backing store preserves the intended
+// chunky rendering while avoiding an unnecessary 960 × 1080 repaint on a
+// narrow phone. The canvas still tracks the viewport and DPR up to this cap.
+const MAX_RENDER_SCALE = 1;
 
 type KeyBindings = { left: string; right: string; pause: string };
 type Settings = { assist: boolean; muted: boolean; shake: boolean; keys: KeyBindings };
@@ -177,7 +181,25 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
   const hullNode = host.querySelector<HTMLElement>('[data-hull]')!;
   const pauseButton = host.querySelector<HTMLButtonElement>('[data-pause]');
   const settingsDialog = preview ? null : document.querySelector<HTMLDialogElement>('#settings-dialog');
+  const motionQuery = matchMedia('(prefers-reduced-motion: reduce)');
   let resumeAfterSettings = false;
+  let hudKey = '';
+
+  function sizeCanvas(): void {
+    const bounds = canvas.getBoundingClientRect();
+    const scale = Math.min(window.devicePixelRatio || 1, MAX_RENDER_SCALE);
+    const width = Math.max(1, Math.round(bounds.width * scale));
+    const height = Math.max(1, Math.round(bounds.height * scale));
+    if (canvas.width !== width || canvas.height !== height) {
+      canvas.width = width;
+      canvas.height = height;
+    }
+  }
+
+  const resizeObserver = new ResizeObserver(() => {
+    sizeCanvas();
+    draw();
+  });
 
   function tone(frequency: number, duration = 0.035): void {
     if (settings.muted || preview || !userActivated) return;
@@ -193,13 +215,17 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
   }
 
   function syncHud(): void {
+    const seconds = Math.ceil(state.lapTime);
+    const terminal = state.status === 'won' || state.status === 'lost';
+    const nextKey = `${state.lap}:${seconds}:${state.score}:${state.hull}:${state.status}`;
+    if (nextKey === hudKey) return;
+    hudKey = nextKey;
     lapNode.textContent = `${state.lap} / ${TOTAL_LAPS}`;
-    timeNode.textContent = String(Math.ceil(state.lapTime)).padStart(2, '0');
+    timeNode.textContent = String(seconds).padStart(2, '0');
     scoreNode.textContent = String(state.score).padStart(6, '0');
     hullNode.textContent = `${'◆'.repeat(state.hull)}${'◇'.repeat(Math.max(0, 5 - state.hull))}`;
-    timeNode.closest('span')?.classList.toggle('is-urgent', state.lapTime <= 10);
+    timeNode.closest('span')?.classList.toggle('is-urgent', seconds <= 10);
     if (pauseButton) {
-      const terminal = state.status === 'won' || state.status === 'lost';
       pauseButton.hidden = terminal;
       pauseButton.disabled = terminal;
       pauseButton.textContent = state.status === 'paused' ? 'Resume run' : 'Pause run';
@@ -239,7 +265,7 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
     const w = canvas.width, h = canvas.height;
     context.fillStyle = '#080a16'; context.fillRect(0, 0, w, h);
     context.fillStyle = '#10152a';
-    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const reduceMotion = motionQuery.matches;
     const starOffset = reduceMotion ? 0 : state.elapsed * (preview ? 8 : 2);
     for (let i = 0; i < 55; i++) {
       const x = ((i * 173 + starOffset) % w);
@@ -269,6 +295,8 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
       context.fillStyle = '#f4f1df'; context.font = 'bold 28px monospace'; context.textAlign = 'center'; context.fillText('FINAL CORE', w / 2, 55);
     }
     canvas.dataset.paddle = state.paddleX.toFixed(3);
+    canvas.dataset.ballX = state.ball.x.toFixed(3);
+    canvas.dataset.status = state.status;
     canvas.dataset.tick = String(state.tick);
     canvas.dataset.hits = String(state.hits);
     canvas.dataset.starOffset = starOffset.toFixed(3);
@@ -295,6 +323,7 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
   }
 
   function loop(now: number): void {
+    raf = 0;
     if (disposed) return;
     const delta = Math.min((now - last) / 1000, 0.1);
     last = now;
@@ -312,7 +341,7 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
       }
       if (state.hits !== lastHits) {
         tone(180 + (state.hits % 5) * 45);
-        if (settings.shake && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        if (settings.shake && !motionQuery.matches) {
           shell.classList.remove('is-shaking');
           requestAnimationFrame(() => shell.classList.add('is-shaking'));
           setTimeout(() => shell.classList.remove('is-shaking'), 130);
@@ -323,7 +352,10 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
       if (!preview && now - lastSave >= AUTOSAVE_INTERVAL_MS) { saveRun(storageKey, state, demo); lastSave = now; }
     }
     syncHud(); showOverlay(); draw();
-    raf = requestAnimationFrame(loop);
+    // There is no changing game state after a win or loss. Stopping the
+    // animation here prevents a finished unattended run from consuming a
+    // phone's frame budget until the player explicitly starts another one.
+    if (state.status !== 'won' && state.status !== 'lost') raf = requestAnimationFrame(loop);
   }
 
   function onKey(event: KeyboardEvent): void {
@@ -354,7 +386,11 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
     if (target.dataset.pause !== undefined || target.dataset.resume !== undefined) setPaused(state.status !== 'paused');
     if (target.dataset.perk) { choosePerk(state, target.dataset.perk as RunState['draft'][number]); tone(440, 0.08); }
     if (target.dataset.restart !== undefined) {
-      state = createRun(demo ? 0x1a57d3a0 : Date.now(), settings.assist); showOverlay(); canvas.focus();
+      state = createRun(demo ? 0x1a57d3a0 : Date.now(), settings.assist);
+      last = performance.now(); accumulator = 0; lastSave = last; hudKey = '';
+      syncHud(); showOverlay(); draw();
+      if (!raf) raf = requestAnimationFrame(loop);
+      canvas.focus();
     }
     if (target.dataset.copy !== undefined) {
       try { await navigator.clipboard.writeText(buildString(state)); host.querySelector<HTMLElement>('[data-copy-status]')!.textContent = 'Build code copied.'; }
@@ -365,9 +401,12 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
 
   // The landing board is a static sample. A full 960×1080 canvas simulation
   // here consumed main-thread time on phones without helping anyone play.
+  sizeCanvas();
+  resizeObserver.observe(canvas);
+
   if (preview) {
     syncHud(); draw();
-    return () => { disposed = true; cancelAnimationFrame(raf); };
+    return () => { disposed = true; resizeObserver.disconnect(); cancelAnimationFrame(raf); };
   }
 
   for (const button of host.querySelectorAll<HTMLButtonElement>('[data-move]')) {
@@ -388,7 +427,7 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
   syncHud(); draw(); raf = requestAnimationFrame(loop);
 
   return () => {
-    disposed = true; cancelAnimationFrame(raf);
+    disposed = true; resizeObserver.disconnect(); cancelAnimationFrame(raf);
     if (!preview && state.status !== 'won' && state.status !== 'lost') saveRun(storageKey, state, demo);
     document.removeEventListener('keydown', onKey); document.removeEventListener('keyup', onKeyUp); document.removeEventListener('visibilitychange', onVisibility); document.removeEventListener('llb-settings', onSettings);
     settingsDialog?.removeEventListener('close', onSettingsClose);

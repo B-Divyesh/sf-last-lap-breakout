@@ -231,6 +231,35 @@ test('a deterministic loss reaches its end screen and restart resets the run', a
   await expect(page.getByRole('heading', { name: 'Hull depleted' })).not.toBeVisible();
 });
 
+test('frame-cadence regression: a finished run releases canvas animation work and restart restores it', async ({ page }) => {
+  await page.addInitScript(() => {
+    let pending = 0;
+    const native = window.requestAnimationFrame.bind(window);
+    window.requestAnimationFrame = callback => {
+      pending += 1;
+      return native(time => {
+        pending -= 1;
+        callback(time);
+      });
+    };
+    Object.defineProperty(window, '__llbPendingAnimationFrames', { get: () => pending });
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/play?test=loss');
+  await expect(page.getByRole('heading', { name: 'Hull depleted' })).toBeVisible();
+  await page.waitForTimeout(120);
+  expect(await page.evaluate(() => (window as unknown as { __llbPendingAnimationFrames: number }).__llbPendingAnimationFrames)).toBe(0);
+
+  const canvas = page.locator('canvas');
+  const bounds = await canvas.boundingBox();
+  expect(bounds).not.toBeNull();
+  expect(await canvas.evaluate(element => (element as HTMLCanvasElement).width)).toBeLessThanOrEqual(Math.ceil(bounds!.width) + 1);
+  expect(await canvas.evaluate(element => (element as HTMLCanvasElement).height)).toBeLessThanOrEqual(Math.ceil(bounds!.height) + 1);
+
+  await page.getByRole('button', { name: 'Start another run' }).click();
+  await expect.poll(() => page.evaluate(() => (window as unknown as { __llbPendingAnimationFrames: number }).__llbPendingAnimationFrames)).toBeGreaterThan(0);
+});
+
 test('@claim:hull-loss each missed orb costs one hull point and zero hull ends the run', async ({ page }) => {
   await page.goto('/demo');
   const run = createRun(404);
@@ -377,6 +406,34 @@ test('@claim:frame-rate the 390px touch game maintains a smooth frame cadence un
     await new Promise<void>(resolve => requestIdleCallback(() => resolve(), { timeout: 2_000 }));
   });
 
+  // Keep the actual demo run in play for the full sample. This uses the same
+  // pointer path a player uses, following the visible orb with one held pointer.
+  // It prevents the benchmark from measuring a finished loss overlay instead
+  // of sustained gameplay.
+  const canvas = page.locator('canvas');
+  const canvasBox = await canvas.boundingBox();
+  expect(canvasBox).not.toBeNull();
+  await page.mouse.move(canvasBox!.x + canvasBox!.width / 2, canvasBox!.y + canvasBox!.height * 0.88);
+  await page.mouse.down();
+  await page.evaluate(() => {
+    const canvas = document.querySelector<HTMLCanvasElement>('canvas')!;
+    canvas.dataset.performanceSteer = 'on';
+    const steer = (): void => {
+      if (canvas.dataset.performanceSteer !== 'on') return;
+      const rect = canvas.getBoundingClientRect();
+      const ballX = Number(canvas.dataset.ballX || '0.5');
+      canvas.dispatchEvent(new PointerEvent('pointermove', {
+        bubbles: true,
+        pointerId: 1,
+        pointerType: 'mouse',
+        clientX: rect.left + Math.max(0, Math.min(1, ballX)) * rect.width,
+        clientY: rect.top + rect.height * 0.88
+      }));
+      requestAnimationFrame(steer);
+    };
+    steer();
+  });
+
   const profile = FRAME_CADENCE_PROFILE;
   const frameTimes = await page.evaluate(({ warmupFrames, sampleFrames }) => new Promise<number[]>(resolve => {
     const times: number[] = [];
@@ -400,6 +457,9 @@ test('@claim:frame-rate the 390px touch game maintains a smooth frame cadence un
   expect(summary.median).toBeGreaterThanOrEqual(14);
   expect(summary.median).toBeLessThanOrEqual(18);
   expect(summary.p90).toBeLessThanOrEqual(34);
+  expect(await canvas.getAttribute('data-status')).toBe('playing');
+  await canvas.evaluate(element => { element.dataset.performanceSteer = 'off'; });
+  await page.mouse.up();
   await context.close();
 });
 

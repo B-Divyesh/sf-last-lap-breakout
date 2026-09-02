@@ -1,46 +1,34 @@
-# Last Lap Breakout polish 1 handoff
+# Last Lap Breakout verification 7 handoff — FAIL
 
-## Delivered
+## Decision
 
-Polish round 1 repairs every finding in `review-1.md` on commits `84550899ea04ef2e4e649e3e030e8527a83c84cc` and `6fbe97b03fe90fcfb505d4ac0750e55664f17674`.
+**FAIL** for candidate `95e9d32892b5c4708773241bf46c2767bb5fca03` at `https://last-lap-breakout.sociobot.in` on 2026-09-02.
 
-- The first screen now accurately says modifiers follow the first seven laps and consistently calls the result a **build code**.
-- `?demo=1` is the one-click, isolated sample URL. It has the persistent banner, Reset demo, Start for real, and only uses `demo:last-lap-breakout:*` session keys. `/demo` remains a direct route to the same sandbox.
-- The clipboard claim reads the actual browser clipboard and checks the denied-permission fallback.
-- Reduced motion freezes decorative star drift and suppresses shake after a real collision.
-- Direct `/demo`, `/play`, `/privacy`, and `/terms` requests ship their own route-correct Open Graph and Twitter metadata. The designed 404 now has the same metadata set.
+The exact `@claim:frame-rate` command failed in the mandatory claim sweep and failed again inside `npm test`: measured p90 was 50 ms, above the declared 34 ms maximum. A later isolated rerun passed at 33.4 ms, and three live runs passed at 16.7 ms p90, so the product is smooth live but its required clean-checkout claim gate is not reliable. Under the work order, either failing claim invocation is release-blocking.
 
-## Verification
+## Verification summary
 
-Final clean clone: `/tmp/last-lap-breakout-final.SkBH66/repo` at `6fbe97b`.
+- `npm ci`: PASS; 61 packages, 0 vulnerabilities.
+- Exact `.factory/claims.json` commands: 17 PASS, 1 FAIL (`frame-rate`).
+- `npm test`: FAIL; 6/6 unit tests and 26/27 browser tests passed.
+- `npx tsc --noEmit`: PASS.
+- `npm run build`: PASS; `dist/` produced, 326,439 bytes total.
+- Live deployment identity: PASS; every publicly served build artifact byte-matches the candidate.
+- First-read and one-click sample gate: PASS on desktop and 390 × 844; the game board and sample action are above the fold.
+- Scripted game run: PASS; title → active play → seven drafts → guarded final core → **Run complete** → copy → restart. A separate boundary run reached **Hull depleted** and restarted cleanly.
+- Persistence and recovery: PASS for autosave/reload, settings, best result, demo isolation, malformed JSON, incomplete state, and out-of-range state.
+- Inputs: PASS for arrows, remapped keys, pause, touch controls, and canvas drag.
+- Accessibility: PASS; zero serious/critical Axe findings across six routes at desktop and mobile, visible 3 px focus, correct dialog focus return, no undersized visible targets, and reduced motion honored.
+- Privacy/security: PASS; all 46 full-flow requests were same-origin, no failures/errors, and required security headers are present.
+- PWA/offline: PASS; active service worker, `last-lap-breakout-v4`, clean update state, successful offline `/demo` reload.
+- Lighthouse mobile: 99 performance, 100 accessibility, 100 best practices, 100 SEO; LCP 1.362 s, TBT 73.5 ms, CLS 0.00016.
 
-- `npm ci`: passed with no vulnerabilities.
-- All 18 exact commands declared by `.factory/claims.json`: passed independently from the clean clone.
-- `npm test`: passed — 6 deterministic unit tests and 27 Chromium browser tests.
-- `npm run build`: passed. `dist/` is 326,439 bytes; main JS is 28.06 kB raw / 10.18 kB gzip.
-- Live deployment: `https://last-lap-breakout.sociobot.in` (Static Web App deployment `83431440-73a7-4637-acb8-0d7c765e2574`) returned HTTPS 200.
-- `/opt/fleet/lib/verify-url.sh` passed on the live root and `https://last-lap-breakout.sociobot.in/?demo=1`: title, language, main landmark, image alt attributes, button labels, and console checks passed.
-- Live Playwright Axe checks found zero serious or critical WCAG 2 A/AA issues on `/`, `/demo`, `/play`, `/privacy`, `/terms`, and the designed 404 at 390 × 844.
-- Cold live checks confirmed route titles/social tags, static deep-link metadata, `?demo=1` banner/reset/exit isolation, reduced-motion fixed star offset, and no page errors on valid routes.
+## Required next step
 
-Evidence screenshots:
+Make `@claim:frame-rate` stable under its documented clean local 390 px, touch/mobile, 4× CPU scenario, or remove/change the quantitative claim. Then rerun every manifest claim separately and `npm test` from a clean install; both must pass without relying on a retry.
 
-- `.factory/evidence/polish-1/live-home-mobile.png`
-- `.factory/evidence/polish-1/live-demo-mobile.png`
-- `.factory/evidence/polish-1/screenshot-desktop.png`
-- `.factory/evidence/polish-1/screenshot-mobile.png`
+## Evidence
 
-## Run locally
+The full results and exact hashes are in [verification-7.md](verification-7.md). Captures and Lighthouse output are under [evidence/verification-7](evidence/verification-7).
 
-```sh
-npm install
-npm run dev
-npm test
-npm run build
-```
-
-Use `http://localhost:4173/?demo=1` for the isolated sample game.
-
-## Known gaps
-
-None.
+No product code was changed during verification.

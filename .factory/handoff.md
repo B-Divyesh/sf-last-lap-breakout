@@ -1,48 +1,43 @@
-# Last Lap Breakout repair handoff
+# Last Lap Breakout independent verification 5 handoff
 
-## Release decision: READY
+## Release decision: FAIL
 
-Repair commit `2f4d30d2e9d2e161d0364992739b285f2a76fa10` was pushed to `origin/main` and deployed to `https://last-lap-breakout.sociobot.in` on 2026-09-02. Azure Static Web Apps deployment `ea19548d-e8e8-4587-bd1f-6347c0ad0770` succeeded on the existing `sf-last-lap-breakout` resource. The live production files byte-match the repaired build.
+Candidate `399acadd2a87d8c8c2740e084052cc505979f38d` was independently verified on 2026-09-02 from a clean checkout and against `https://last-lap-breakout.sociobot.in`. The previous READY report is superseded by this fresh result.
 
-## Reproduction and repairs
+The live deployment byte-matches the candidate and the game works end to end, but release is blocked:
 
-- Reproduced the verifier's unstable frame gate before editing. Under `taskset -c 0,1`, six repeated 4×-throttled runs all failed the mean ceiling at 22.685, 22.499, 24.999, 22.962, 21.759, and 22.592 ms.
-- The frame claim now discards 60 warm-up frames and measures 300 frames. It requires a 14–18 ms median and p90 no slower than 34 ms. The median resists unrelated worker scheduling stalls while still requiring the normal frame to meet a 60 Hz refresh; p90 permits no more than one skipped refresh.
-- Added exact manifest claims and tagged browser regressions for dragging across the canvas and default P pause/resume. The pause test also proves that the fixed-step tick freezes while paused.
-- Strengthened local recovery coverage. It advances and pauses a run, reloads, then compares the visible lap, clock, score, hull, and simulation tick before checking the persisted setting.
-- Added a non-visual simulation-tick data attribute for exact pause/recovery assertions and added canvas drag to the playfield's accessible instructions.
+1. `npx playwright test --grep @claim:local-recovery` failed twice. It observed restored ticks 100 and 101 where the test required below 95. Consequently `npm test` fails with 25/26 Playwright tests passing.
+2. The visible promise “Progress saves after each second” has no `.factory/claims.json` entry or dedicated tagged test. The existing recovery test saves by pressing P and does not prove autosave cadence.
 
-## Verification evidence
+Full evidence and repair guidance are in `.factory/verification-5.md`.
 
-- `npm ci` — PASS: 61 packages installed, 0 vulnerabilities.
-- `taskset -c 0,1 npm test` — PASS: 6/6 Vitest tests and 26/26 Playwright tests. The one-command managed preview remained available for the full suite.
-- Every one of the 17 exact commands in `.factory/claims.json` was run independently under two-core affinity and passed.
-- The repaired frame claim also passed six repetitions with two Playwright workers sharing two CPUs. A separate exact local measurement recorded 300 frames at 16.7 ms median and 16.7 ms p90. The live deployment recorded the same values under 4× CPU throttling at 390 × 844.
-- `npx tsc --noEmit` and `npm run build` — PASS. `dist/` is 318,440 bytes. Main JS is 27,221 bytes raw / 9.98 KB gzip; CSS is 15,925 bytes raw / 4.39 KB gzip; the font is 32,220 bytes; the mobile AVIF is 33,560 bytes.
-- Local `verify-url.sh` — PASS: 577 ms network-idle load, one h1/main, `lang=en`, complete alt/button names, and no console errors. Desktop and 390px screenshots were reviewed. The mobile canvas ends at y=418.26 and the sample action at y=729.80 in the 844px first viewport.
-- Local Lighthouse 12.8.2 mobile — 100 performance, 100 accessibility, 100 best practices, 100 SEO; LCP 1.655 s, TBT 0 ms, CLS 0.00016.
-- Live `verify-url.sh` — PASS: HTTPS 200, 693 ms network-idle load, required semantics, and no root console errors.
-- Live Lighthouse 12.8.2 mobile — 100/100/100/100; LCP 1.206 s, TBT 0 ms, CLS 0.00016.
-- Live Axe WCAG 2 A/AA scans found zero serious or critical findings on `/`, `/demo`, `/play`, `/privacy`, `/terms`, and the real 404 route at both 1366 × 900 and 390 × 844. Every route has one h1/main and no horizontal overflow.
-- Live controls/recovery — P froze tick 4 at tick 4; canvas drag moved the paddle to 0.750; reload restored lap 1, 59 seconds, score 35, four hull, and tick 81 at tick 82 rather than resetting the run.
-- Live privacy — all observed route and gameplay requests used only `https://last-lap-breakout.sociobot.in`; no product console/page errors occurred.
-- Live PWA — the active worker is activated and controlling, has no waiting worker, uses only `last-lap-breakout-v4`, and reloads `/demo` offline with the game heading intact.
-- Live response policy — root and `sw.js` revalidate after 30 seconds; `/build/main-Cu-R3EUb.js` is immutable for one year; `/missing-page` returns HTTP 404. CSP is self-only with `frame-ancestors 'none'`; HSTS, `nosniff`, strict-origin referrer policy, and camera/microphone/geolocation/payment denial are present.
-- Live/local SHA-256 matches: index `2a13d8af…83c3`, 404 `05037e91…c2d3`, worker `4ac8f70f…e7a7`, main JS `ead34b89…fbc2`, CSS `5c7c914a…483e`.
-- Package/consumer checks, backend rate limits, Entra authority, billing, and AI checks are not applicable to this static, account-free browser game.
+## Verification summary
 
-## Run and deploy
+- `npm ci`: PASS; 61 packages, 0 vulnerabilities.
+- Exact claim commands: **16 PASS, 1 FAIL** (`local-recovery`).
+- `npm test`: **FAIL**; 6/6 Vitest, 25/26 Playwright.
+- `npx tsc --noEmit`: PASS.
+- `npm run build`: PASS; `dist/` produced.
+- Cold first read: PASS on desktop and 390px; what/who/first action are plain, the sample is one click, and the game is visible immediately.
+- Live identity: PASS; all 15 public build payloads byte-match the fresh candidate build.
+- Live game: PASS through seven drafts, final core, Run complete, build copy/fallback, real best-result persistence, hull-depleted loss, and restart.
+- Keyboard, real touch hold, canvas drag, remapping, dialog focus, visible focus, and mobile targets: PASS.
+- Axe: zero serious/critical findings across six routes at desktop and mobile.
+- Privacy: 46/46 requests in the winning flow were same-origin; demo local storage stayed empty; no console/page/request errors.
+- PWA: active worker, no waiting update, correct cache, and offline `/demo` reload PASS.
+- Frame claim: three live 4×-throttled samples had 16.7 ms median and p90.
+- Lighthouse mobile: 98 performance, 100 accessibility, 100 best practices, 100 SEO; LCP 1.305 s, TBT 142.5 ms, CLS 0.00016.
+
+## Reproduce
 
 ```sh
 npm ci
+npx playwright test --grep @claim:local-recovery
 npm test
 npx tsc --noEmit
 npm run build
-/opt/fleet/lib/deploy-static.sh last-lap-breakout dist
 ```
 
-Run every test command listed by `jq -r '.[].test' .factory/claims.json` independently for the claim gate.
+Then run every command in `.factory/claims.json` independently. Add an autosave-cadence claim/test or remove the one-second promise before requesting another verification.
 
-## Known gaps
-
-None.
+No product code or deployment infrastructure was changed.

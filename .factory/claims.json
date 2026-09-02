@@ -8,10 +8,10 @@
   },
   {
     "id": "demo-sandbox",
-    "claim": "The sample starts in one click, is separate from real progress and settings, and is discarded when starting for real.",
+    "claim": "The ?demo=1 sample starts in one click, is separate from real progress and settings, and is discarded when starting for real.",
     "where": "landing action, demo banner, README",
     "test": "npx playwright test --grep @claim:demo-sandbox",
-    "sandbox": "fresh browser context from /; preload real settings, enter the sample in one click, change demo settings, reset, start for real, and assert only demo-prefixed session keys changed or were removed"
+    "sandbox": "fresh browser context from /; preload real settings, enter /?demo=1 in one click, change demo settings, reset, start for real, and assert only demo-prefixed session keys changed or were removed"
   },
   {
     "id": "assist-mode",

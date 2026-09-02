@@ -55,7 +55,7 @@ test('@claim:finite-run a title-screen sample reaches the eighth-lap result', as
 
   await page.goto('/?test=1');
   await page.getByRole('link', { name: 'Try it with sample data' }).click();
-  await expect(page).toHaveURL(/\/demo\?test=1$/);
+  await expect(page).toHaveURL(/\/\?demo=1&test=1$/);
   await finishAcceleratedRun(page);
   await expect(page.getByLabel('Build code')).toHaveValue('LLB-7B4T5S-CEBQHDW-0SBRZTA');
 });
@@ -64,7 +64,7 @@ test('@claim:demo-sandbox demo is marked and uses a separate namespace', async (
   await page.goto('/');
   await page.evaluate(() => localStorage.setItem('last-lap-breakout:settings:v1', JSON.stringify({ assist: true, muted: true, shake: false })));
   await page.getByRole('link', { name: 'Try it with sample data' }).click();
-  await expect(page).toHaveURL('/demo');
+  await expect(page).toHaveURL('/?demo=1');
   await expect(page.getByText('Demo — sample data, nothing is saved')).toBeVisible();
   await page.getByRole('button', { name: 'Game settings' }).click();
   await expect(page.getByLabel('Mute sound')).not.toBeChecked();

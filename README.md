@@ -4,7 +4,7 @@ Finish an eight-minute Breakout run by choosing seven modifiers.
 
 Last Lap Breakout is a free browser game for people taking a short break. Every run has eight 60-second laps. After each of the first seven laps, choose one of three modifiers. The eighth lap is a guarded core battle. It ends with a score and build code.
 
-Play the isolated sample at `/demo` or `https://last-lap-breakout.sociobot.in/demo`. It starts in one click and does not write to real-run storage.
+Play the isolated sample at `/?demo=1` or `https://last-lap-breakout.sociobot.in/?demo=1`. It starts in one click and does not write to real-run storage.
 
 ## Controls
 
@@ -24,7 +24,7 @@ npm install
 npm run dev
 ```
 
-Open `http://localhost:4173`. Use `http://localhost:4173/demo` for the clean sample run.
+Open `http://localhost:4173`. Use `http://localhost:4173/?demo=1` for the clean sample run.
 
 ## Test and build
 

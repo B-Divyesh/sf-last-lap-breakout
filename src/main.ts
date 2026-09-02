@@ -54,7 +54,7 @@ function homePage(): string {
         <h1 tabindex="-1">Finish a Breakout run in eight minutes</h1>
         <p class="hero-intro">For short breaks: clear eight fixed laps, choose modifiers after the first seven, and finish with a build code.</p>
         <div class="hero-actions">
-          <a class="button" href="/demo" data-link>Try it with sample data</a>
+          <a class="button" href="/?demo=1" data-link>Try it with sample data</a>
           <span>A sample run starts immediately.</span>
         </div>
         <a class="text-action" href="/play" data-link>${hasSavedRun() ? 'Resume your saved run' : 'Start a new run'}</a>
@@ -111,6 +111,7 @@ function notFoundPage(): string {
 }
 
 function currentPath(): string {
+  if (location.pathname === '/' && new URLSearchParams(location.search).get('demo') === '1') return '/demo';
   const path = location.pathname.replace(/\/$/, '') || '/';
   return routeData[path] ? path : '/404';
 }
@@ -149,8 +150,9 @@ function navigate(event: MouseEvent): void {
   const link = event.currentTarget as HTMLAnchorElement;
   if (link.origin !== location.origin || link.hash) return;
   const keepTestMode = ['127.0.0.1', 'localhost'].includes(location.hostname) && new URLSearchParams(location.search).has('test');
-  const search = keepTestMode && !link.search && (link.pathname === '/demo' || link.pathname === '/play') ? location.search : link.search;
-  event.preventDefault(); history.pushState({}, '', link.pathname + search); render(true);
+  const target = new URL(link.href);
+  if (keepTestMode && (target.pathname === '/demo' || target.pathname === '/play' || target.searchParams.get('demo') === '1') && !target.searchParams.has('test')) target.searchParams.set('test', '1');
+  event.preventDefault(); history.pushState({}, '', target.pathname + target.search); render(true);
 }
 
 window.addEventListener('popstate', () => render(true));

@@ -1,6 +1,6 @@
 # Demo sandbox
 
-- URL: `https://last-lap-breakout.sociobot.in/demo` (local: `http://localhost:4173/demo`).
+- URL: `https://last-lap-breakout.sociobot.in/?demo=1` (local: `http://localhost:4173/?demo=1`). `/demo` is also a direct route to the same isolated sample.
 - Sample: a deterministic run seeded with `0x1a57d3a0`, including the same eight laps and modifier choices as a real run.
 - Reset: use **Reset demo** in the persistent banner. This clears and restarts only the demo run.
 - Leave: use **Start for real**. Demo progress is discarded.

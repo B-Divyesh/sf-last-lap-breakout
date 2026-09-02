@@ -1,43 +1,22 @@
-# Last Lap Breakout independent verification 9 — PASS
+# Review 2 handoff — FAIL
 
-Candidate `6cb6d3a9f92590fecc8b7289f04e106721ba3206` was independently verified on 2026-09-02 against `https://last-lap-breakout.sociobot.in`.
+Completed the adversarial first-read review for commit `0a89be2ce43963f372a87b37b021d510472a0d7a`. Product code was not modified.
 
-## Verdict
+## Verified
 
-**PASS.** All 18 required claim commands pass. The complete test, type-check, and production-build gates pass. All 19 public build artifacts byte-match production. A genuine live eight-minute run reaches **Run complete**, and a separate live run reaches **Hull depleted** and resets correctly.
+- Cold live checks at 390 × 844 and 1440 × 900: the job, audience, and first action are clear before scrolling.
+- The live one-click demo enters `/?demo=1`, shows the persistent sandbox banner and controls, and makes same-origin requests only.
+- Every one of the 18 declared claim commands passed from fresh clone `/tmp/last-lap-review-2.xI6nVA`.
+- `npm test` passed: 8 Vitest tests and 28 Playwright tests.
+- `npm run build` passed and generated `dist/` (326,963 bytes).
+- Live route, metadata, accessibility, link, history, earlier-review, privacy, reduced-motion, and visual-identity checks are documented in [review-2.md](review-2.md).
 
-## Verification summary
+## Remaining work
 
-- `npm ci`: 61 packages installed, 0 vulnerabilities.
-- All 18 `.factory/claims.json` commands: PASS.
-- `npm test`: 8/8 Vitest and 28/28 Playwright tests passed.
-- `npx tsc --noEmit`: PASS.
-- `npm run build`: PASS; `dist/` is 326,963 bytes.
-- Cold first-read: PASS at desktop and 390 × 844. It states what the game is, who it is for, what to click, includes the one-click sample, and shows the board in the first viewport.
-- Live full run: 481.395 seconds, seven three-choice drafts, final core, 14,369 points, build `LLB-7B4T5S-CEBQHDW-0MXK6F5`; clipboard and restart checks passed.
-- Live loss: zero hull reached on lap 1 in 18.882 seconds; restart restored lap 1/time 60/score zero/four hull.
-- Persistence, malformed-data recovery, assist mode, keyboard/remapping, real touch controls, canvas drag, pause, demo isolation, reduced motion, and offline reload passed.
-- Axe: zero serious/critical findings across six live routes at desktop and mobile sizes. Keyboard focus is visible and dialog focus returns correctly.
-- Live frame cadence at 390 px and 4× CPU: median 16.7 ms, p90 16.7 ms, p95 16.7 ms.
-- Lighthouse mobile: 99 Performance, 100 Accessibility, 100 Best Practices, 100 SEO; LCP 1.218 s, TBT 129 ms, CLS 0.00016, transfer 83,431 bytes.
-- Live traffic stayed same-origin with no console/page errors. Security headers, immutable hashed-asset caching, service-worker update state, and offline reload passed.
+The review verdict is **FAIL** because three minor findings remain:
 
-Full evidence and claim-by-claim results are in [verification-9.md](verification-9.md).
+1. `F-2-1`: “Free” appears on the landing page and README but has no entry or proof in `.factory/claims.json`.
+2. `F-2-2`: Public “original generated scene” provenance copy is a visitor-facing claim that cannot be sandbox-tested.
+3. `F-2-3`: `.factory/design.md` lists Rail as `#293052`, while the live CSS uses `#4b5686`.
 
-## Defects
-
-- Critical: none.
-- High: none.
-- Medium: none.
-- Low: `.factory/design.md` says Rail is `#293052`; the shipped CSS token is `#4b5686`. This documentation drift does not affect the passing contrast/accessibility result.
-
-## Reproduce
-
-```sh
-npm ci
-npm test
-npx tsc --noEmit
-npm run build
-```
-
-No deployment action was taken. This static product has no backend, billing, sign-in, or server-side endpoint.
+Resolve those three findings and rerun the review evidence before claiming acceptance. No deployment action was taken.

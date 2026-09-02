@@ -19,6 +19,11 @@ import {
   stepRun,
   TOTAL_LAPS
 } from '../../src/game/core';
+import {
+  FRAME_CADENCE_PROFILE,
+  measuredFrameIntervals,
+  summarizeFrameCadence
+} from '../frame-metrics';
 
 async function finishAcceleratedRun(page: import('@playwright/test').Page): Promise<void> {
   for (let lap = 1; lap < TOTAL_LAPS; lap++) {
@@ -353,6 +358,7 @@ test('@claim:best-result a completed real run saves its best result through relo
 });
 
 test('@claim:frame-rate the 390px touch game maintains a smooth frame cadence under 4x CPU throttling', async ({ browser }, testInfo) => {
+  test.setTimeout(60_000);
   const context = await browser.newContext({
     viewport: { width: 390, height: 844 },
     deviceScaleFactor: 2,
@@ -362,30 +368,38 @@ test('@claim:frame-rate the 390px touch game maintains a smooth frame cadence un
   const page = await context.newPage();
   const cdp = await context.newCDPSession(page);
   await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
-  await page.goto('/demo');
-  const intervals = await page.evaluate(() => new Promise<number[]>(resolve => {
+  await page.goto('/demo', { waitUntil: 'networkidle' });
+  await expect(page.getByRole('heading', { name: 'Play an eight-lap Breakout run' })).toBeVisible();
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+    await navigator.serviceWorker.ready;
+    await Promise.all([...document.images].map(image => image.complete ? Promise.resolve() : image.decode()));
+    await new Promise<void>(resolve => requestIdleCallback(() => resolve(), { timeout: 2_000 }));
+  });
+
+  const profile = FRAME_CADENCE_PROFILE;
+  const frameTimes = await page.evaluate(({ warmupFrames, sampleFrames }) => new Promise<number[]>(resolve => {
     const times: number[] = [];
     const sample = (time: number): void => {
       times.push(time);
-      if (times.length === 361) resolve(times.slice(61).map((value, index) => value - times[index + 60]));
+      if (times.length === warmupFrames + sampleFrames + 1) resolve(times);
       else requestAnimationFrame(sample);
     };
     requestAnimationFrame(sample);
-  }));
-  const sorted = [...intervals].sort((a, b) => a - b);
-  const percentile = (fraction: number): number => sorted[Math.ceil(sorted.length * fraction) - 1];
-  const median = percentile(0.5);
-  const p90 = percentile(0.9);
+  }), profile);
+  const intervals = measuredFrameIntervals(frameTimes, profile.warmupFrames, profile.sampleFrames);
+  const summary = summarizeFrameCadence(intervals);
   await testInfo.attach('frame-budget.json', {
-    body: JSON.stringify({ samples: intervals.length, median, p90 }, null, 2),
+    body: JSON.stringify({ ...profile, ...summary }, null, 2),
     contentType: 'application/json'
   });
-  // The median resists unrelated worker scheduling stalls while still
-  // requiring the normal game frame to hit a 60 Hz display. The tail budget
-  // permits at most one skipped refresh for 90% of measured frames.
-  expect(median).toBeGreaterThanOrEqual(14);
-  expect(median).toBeLessThanOrEqual(18);
-  expect(p90).toBeLessThanOrEqual(34);
+  // Readiness plus a separate three-second warm-up keeps startup work out of
+  // the sample. Fifteen seconds of gameplay makes p90 stable without hiding
+  // sustained missed frames: more than 90 slow intervals still fail.
+  expect(summary.samples).toBe(900);
+  expect(summary.median).toBeGreaterThanOrEqual(14);
+  expect(summary.median).toBeLessThanOrEqual(18);
+  expect(summary.p90).toBeLessThanOrEqual(34);
   await context.close();
 });
 

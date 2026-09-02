@@ -11,8 +11,8 @@ export const FRAME_CADENCE_PROFILE = Object.freeze({
 
 export function measuredFrameIntervals(
   frameTimes: readonly number[],
-  warmupFrames = FRAME_CADENCE_PROFILE.warmupFrames,
-  sampleFrames = FRAME_CADENCE_PROFILE.sampleFrames
+  warmupFrames: number = FRAME_CADENCE_PROFILE.warmupFrames,
+  sampleFrames: number = FRAME_CADENCE_PROFILE.sampleFrames
 ): number[] {
   const requiredTimestamps = warmupFrames + sampleFrames + 1;
   if (frameTimes.length !== requiredTimestamps) {

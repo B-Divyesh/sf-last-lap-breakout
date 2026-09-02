@@ -27,7 +27,7 @@ Panels have clipped upper-right corners, two-pixel rails, and hard four-pixel sh
 
 ## Motion policy
 
-The signature motion is a slow horizontal star drift behind active play. The landing board is a static sample so the first phone view stays responsive; movement begins only after a player opens a run. Interface transitions last 180 ms and move no more than eight pixels. Screen shake is off in reduced-motion mode and can always be disabled. With `prefers-reduced-motion: reduce`, star drift stops, transitions become immediate, and screen shake is disabled. Players can map extra J/L or H/K movement keys and Escape pause in Game settings; arrows and A/D remain available.
+The signature motion is a slow horizontal star drift behind active play. The landing board is a static sample so the first phone view stays responsive; movement begins only after a player opens a run. The Canvas backing store follows the rendered board at a one-CSS-pixel cap; this deliberate raster choice keeps the pixel-art edges crisp while avoiding oversized phone repaints. A completed or lost run renders its result once and releases its animation frame until restart. Interface transitions last 180 ms and move no more than eight pixels. Screen shake is off in reduced-motion mode and can always be disabled. With `prefers-reduced-motion: reduce`, star drift stops, transitions become immediate, and screen shake is disabled. Players can map extra J/L or H/K movement keys and Escape pause in Game settings; arrows and A/D remain available.
 
 ## Game feel and difficulty
 

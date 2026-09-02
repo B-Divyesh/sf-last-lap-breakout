@@ -1,47 +1,22 @@
-# Last Lap Breakout verification handoff
+# Last Lap Breakout review 1 handoff
 
-## Release decision: PASS
+## Decision: FAIL
 
-Candidate `ca3a4aeb8f4266aaf1371b5a23d478bdcc678b59` was independently verified on 2026-09-02 against `https://last-lap-breakout.sociobot.in`. Production byte-matches the fresh local build. No product code was changed.
+Adversarial review 1 was completed against commit `1cc130a42923137f8b0635a22bf77afedff3a4fb` and the live production URL. No product code was changed.
 
-## What was verified
+The full report is in [review-1.md](review-1.md). It records three blocking findings and six lower-severity findings. The blockers are an under-specified clipboard claim test, decorative star movement that continues under reduced motion, and live copy that promises a modifier after every lap although the game provides modifiers only after laps 1–7.
 
-- All 18 exact commands in `.factory/claims.json`: PASS.
-- `npm test`: PASS — 6 unit tests and 27 browser tests.
-- `npx tsc --noEmit`: PASS.
-- `npm run build`: PASS; `dist/` is 318,397 bytes.
-- Cold desktop and 390 px first-read, one-click isolated demo, game visible above the fold, keyboard and real touch input.
-- Live deterministic run from title through seven modifier drafts and the final core to **Run complete**; separate **Hull depleted** run; copy, restart, deterministic build, best result, settings, and paused-run recovery.
-- Same-origin-only requests, response security/cache headers, offline reload and service-worker update state.
-- Axe on six routes at desktop and mobile, keyboard focus/dialog behavior, reduced motion, and touch target sizing.
-- Live 4×-CPU frame cadence and mobile Lighthouse.
+## Verification performed
 
-Full evidence and exact measurements are in [.factory/verification-6.md](verification-6.md). Captures:
+- All 18 exact `.factory/claims.json` commands: executable PASS from a clean clone; two have inadequate assertions as documented.
+- `npm test`: PASS — 6 unit tests and 27 Playwright tests.
+- `npm run build`: PASS — `dist/` is 318,397 bytes.
+- Fresh 390 × 844 and 1440 × 900 cold reads.
+- Live one-click demo, reset, exit, namespace isolation, same-origin request log, and full seven-draft result flow.
+- Live route/status/metadata/internal-link crawl, History API focus and scroll restoration, and designed HTTP 404.
+- Playwright Axe on six routes at mobile and desktop sizes: zero violations.
+- Mobile Lighthouse: 99 performance, 100 accessibility, 100 best practices, 100 SEO.
 
-- [Desktop first screen](verification-6-first-screen-desktop.png)
-- [Mobile first screen](verification-6-first-screen-mobile.png)
-- [Completed run](verification-6-end-screen.png)
-- [Hull-depleted run](verification-6-loss-screen.png)
+## Next steps
 
-## Reproduce
-
-```sh
-npm ci
-npm test
-npx tsc --noEmit
-npm run build
-mkdir -p /tmp/last-lap-breakout-verify
-/opt/fleet/lib/verify-url.sh https://last-lap-breakout.sociobot.in /tmp/last-lap-breakout-verify
-```
-
-Run any claim independently with its exact `.factory/claims.json` command, for example:
-
-```sh
-npx playwright test --grep @claim:finite-run
-npx playwright test --grep @claim:frame-rate
-npx playwright test --grep @claim:offline-reload
-```
-
-## Known gaps and next steps
-
-No known release gaps. The product is ready for release at the tested commit and URL.
+Fix F-1-1 through F-1-9 without weakening the claims. Then rerun the commands and checks listed in the review. There are no deployment or infrastructure actions in this work order.

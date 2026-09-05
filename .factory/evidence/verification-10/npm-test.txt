@@ -1,0 +1,27 @@
+
+> last-lap-breakout@1.0.0 test
+> vitest run && playwright test
+
+
+ RUN  v3.2.6 /work/repo
+
+ ✓ tests/frame-metrics.test.ts (2 tests) 6ms
+ ✓ tests/core.test.ts (6 tests) 7ms
+
+ Test Files  2 passed (2)
+      Tests  8 passed (8)
+   Start at  20:08:46
+   Duration  691ms (transform 104ms, setup 0ms, collect 191ms, tests 13ms, environment 0ms, prepare 350ms)
+
+[WebServer] (node:4150) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:4181) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 29 tests using 1 worker
+(node:4199) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:4199) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+·····························
+  29 passed (1.2m)

@@ -1,0 +1,42 @@
+MATCH 404.html
+MATCH apple-touch-icon.png
+MATCH assets/orbital-breakout.avif
+MATCH assets/orbital-breakout.webp
+MATCH assets/share-card.jpg
+MATCH assets/silkscreen.ttf
+MATCH build/main-8oI5op97.js
+MATCH build/notFound-RjyLHn5n.js
+MATCH build/style-C8UwdIFa.js
+MATCH build/style-qWge9HFd.css
+MATCH demo/index.html
+MATCH favicon.svg
+MATCH index.html
+MATCH play/index.html
+MATCH privacy/index.html
+MATCH robots.txt
+MATCH sitemap.xml
+MATCH sw.js
+MATCH terms/index.html
+TOTAL_MATCH 19
+CONFIG_NOT_PUBLIC 404
+LOCAL_MAIN 476ebd18f7982c96fde46eac10b58451c181e00a4825769740d9557fea9dea4c  dist/build/main-8oI5op97.js
+LIVE_ROOT_STATUS 200
+LIVE_404_STATUS 404
+HTTP_REDIRECT 301 https://last-lap-breakout.sociobot.in/
+HEADERS
+HTTP/2 200 
+content-type: text/html
+date: Sat, 05 Sep 2026 20:10:34 GMT
+accept-ranges: bytes
+cache-control: public, must-revalidate, max-age=30
+etag: "31911708"
+last-modified: Sat, 05 Sep 2026 19:59:18 GMT
+content-length: 1792
+strict-transport-security: max-age=10886400; includeSubDomains; preload
+referrer-policy: strict-origin-when-cross-origin
+x-content-type-options: nosniff
+x-xss-protection: 1; mode=block
+x-dns-prefetch-control: off
+content-security-policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self'; media-src 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+permissions-policy: camera=(), microphone=(), geolocation=(), payment=()
+

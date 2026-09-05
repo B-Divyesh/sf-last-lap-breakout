@@ -1,0 +1,44 @@
+{
+  "settingsFreeze": {
+    "before": {
+      "time": "59",
+      "tick": "65"
+    },
+    "opened": {
+      "time": "58",
+      "tick": "121",
+      "open": true
+    },
+    "during": {
+      "time": "58",
+      "tick": "121",
+      "open": true
+    },
+    "after": {
+      "tick": "139",
+      "focusReturned": true
+    },
+    "errors": []
+  },
+  "lossAndRestart": {
+    "loss": {
+      "durationSeconds": 15.089,
+      "status": "lost",
+      "lap": "1 / 8",
+      "score": "210 points",
+      "build": "LLB-7B4T5S-BASE-1JFPFIQ",
+      "pauseHidden": true,
+      "banner": "Demo — sample data, nothing is saved"
+    },
+    "restart": {
+      "status": "playing",
+      "lap": "1 / 8",
+      "time": "60",
+      "score": "000000",
+      "hull": "◆◆◆◆◇",
+      "pauseVisible": true,
+      "terminalHidden": true
+    },
+    "errors": []
+  }
+}

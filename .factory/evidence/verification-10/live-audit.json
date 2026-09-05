@@ -1,0 +1,713 @@
+{
+  "base": "https://last-lap-breakout.sociobot.in",
+  "startedAt": "2026-09-05T20:16:02.386Z",
+  "firstScreenDesktop": {
+    "h1": "Finish a Breakout run in eight minutes",
+    "audience": "For short breaks: clear eight fixed laps, choose modifiers after the first seven, and finish with a build code.",
+    "action": "Try it with sample data",
+    "helper": "A sample run starts immediately.",
+    "facts": [
+      "8 × 60 seconds\nThen the run ends.",
+      "Free. No account.\nNo purchases or ads.",
+      "Keyboard and touch.\nAssist mode included."
+    ],
+    "board": {
+      "x": 718.3028564453125,
+      "y": 346.76190185546875,
+      "width": 479.5635986328125,
+      "height": 536.268798828125
+    },
+    "actionBox": {
+      "x": 100,
+      "y": 728.515625,
+      "width": 251.671875,
+      "height": 52.796875
+    },
+    "overflow": false
+  },
+  "firstScreenMobile": {
+    "h1": "Finish a Breakout run in eight minutes",
+    "audience": "For short breaks: clear eight fixed laps, choose modifiers after the first seven, and finish with a build code.",
+    "action": "Try it with sample data",
+    "helper": "A sample run starts immediately.",
+    "facts": [
+      "8 × 60 seconds\nThen the run ends.",
+      "Free. No account.\nNo purchases or ads.",
+      "Keyboard and touch.\nAssist mode included."
+    ],
+    "board": {
+      "x": 73.83541870117188,
+      "y": 148.97247314453125,
+      "width": 240.81088256835938,
+      "height": 269.2851867675781
+    },
+    "actionBox": {
+      "x": 12,
+      "y": 677,
+      "width": 366,
+      "height": 52.796875
+    },
+    "overflow": false
+  },
+  "routesDesktop": [
+    {
+      "route": "/",
+      "status": 200,
+      "structure": {
+        "lang": "en",
+        "title": "Last Lap Breakout — finish eight arcade laps",
+        "h1Count": 1,
+        "h1": "Finish a Breakout run in eight minutes",
+        "mainCount": 1,
+        "missingAlt": 0,
+        "overflow": false,
+        "canonical": "https://last-lap-breakout.sociobot.in/",
+        "description": "Play eight fixed Breakout laps, choose modifiers after the first seven, and finish with a build code.",
+        "ogTitle": "Last Lap Breakout — finish eight arcade laps",
+        "twitterTitle": "Last Lap Breakout — finish eight arcade laps"
+      },
+      "seriousCriticalAxe": 0,
+      "undersizedTargets": [],
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "route": "/demo",
+      "status": 200,
+      "structure": {
+        "lang": "en",
+        "title": "Demo — Last Lap Breakout",
+        "h1Count": 1,
+        "h1": "Play an eight-lap Breakout run",
+        "mainCount": 1,
+        "missingAlt": 0,
+        "overflow": false,
+        "canonical": "https://last-lap-breakout.sociobot.in/demo",
+        "description": "Try a sample Last Lap Breakout run without saving real progress.",
+        "ogTitle": "Demo — Last Lap Breakout",
+        "twitterTitle": "Demo — Last Lap Breakout"
+      },
+      "seriousCriticalAxe": 0,
+      "undersizedTargets": [],
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "route": "/play",
+      "status": 200,
+      "structure": {
+        "lang": "en",
+        "title": "Play — Last Lap Breakout",
+        "h1Count": 1,
+        "h1": "Play an eight-lap Breakout run",
+        "mainCount": 1,
+        "missingAlt": 0,
+        "overflow": false,
+        "canonical": "https://last-lap-breakout.sociobot.in/play",
+        "description": "Play a complete eight-lap Breakout run and finish with a build code.",
+        "ogTitle": "Play — Last Lap Breakout",
+        "twitterTitle": "Play — Last Lap Breakout"
+      },
+      "seriousCriticalAxe": 0,
+      "undersizedTargets": [],
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "route": "/privacy",
+      "status": 200,
+      "structure": {
+        "lang": "en",
+        "title": "Privacy — Last Lap Breakout",
+        "h1Count": 1,
+        "h1": "Your game stays in this browser",
+        "mainCount": 1,
+        "missingAlt": 0,
+        "overflow": false,
+        "canonical": "https://last-lap-breakout.sociobot.in/privacy",
+        "description": "How Last Lap Breakout stores game progress on your device.",
+        "ogTitle": "Privacy — Last Lap Breakout",
+        "twitterTitle": "Privacy — Last Lap Breakout"
+      },
+      "seriousCriticalAxe": 0,
+      "undersizedTargets": [],
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "route": "/terms",
+      "status": 200,
+      "structure": {
+        "lang": "en",
+        "title": "Terms — Last Lap Breakout",
+        "h1Count": 1,
+        "h1": "Play for free",
+        "mainCount": 1,
+        "missingAlt": 0,
+        "overflow": false,
+        "canonical": "https://last-lap-breakout.sociobot.in/terms",
+        "description": "Terms for playing Last Lap Breakout.",
+        "ogTitle": "Terms — Last Lap Breakout",
+        "twitterTitle": "Terms — Last Lap Breakout"
+      },
+      "seriousCriticalAxe": 0,
+      "undersizedTargets": [],
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "route": "/definitely-missing-verification-10",
+      "status": 404,
+      "structure": {
+        "lang": "en",
+        "title": "Page not found — Last Lap Breakout",
+        "h1Count": 1,
+        "h1": "This lap does not exist",
+        "mainCount": 1,
+        "missingAlt": 0,
+        "overflow": false,
+        "canonical": "https://last-lap-breakout.sociobot.in/404",
+        "description": "The requested Last Lap Breakout page was not found.",
+        "ogTitle": "Page not found — Last Lap Breakout",
+        "twitterTitle": "Page not found — Last Lap Breakout"
+      },
+      "seriousCriticalAxe": 0,
+      "undersizedTargets": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 ()"
+      ],
+      "pageErrors": []
+    }
+  ],
+  "routesMobile": [
+    {
+      "route": "/",
+      "status": 200,
+      "structure": {
+        "lang": "en",
+        "title": "Last Lap Breakout — finish eight arcade laps",
+        "h1Count": 1,
+        "h1": "Finish a Breakout run in eight minutes",
+        "mainCount": 1,
+        "missingAlt": 0,
+        "overflow": false,
+        "canonical": "https://last-lap-breakout.sociobot.in/",
+        "description": "Play eight fixed Breakout laps, choose modifiers after the first seven, and finish with a build code.",
+        "ogTitle": "Last Lap Breakout — finish eight arcade laps",
+        "twitterTitle": "Last Lap Breakout — finish eight arcade laps"
+      },
+      "seriousCriticalAxe": 0,
+      "undersizedTargets": [],
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "route": "/demo",
+      "status": 200,
+      "structure": {
+        "lang": "en",
+        "title": "Demo — Last Lap Breakout",
+        "h1Count": 1,
+        "h1": "Play an eight-lap Breakout run",
+        "mainCount": 1,
+        "missingAlt": 0,
+        "overflow": false,
+        "canonical": "https://last-lap-breakout.sociobot.in/demo",
+        "description": "Try a sample Last Lap Breakout run without saving real progress.",
+        "ogTitle": "Demo — Last Lap Breakout",
+        "twitterTitle": "Demo — Last Lap Breakout"
+      },
+      "seriousCriticalAxe": 0,
+      "undersizedTargets": [],
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "route": "/play",
+      "status": 200,
+      "structure": {
+        "lang": "en",
+        "title": "Play — Last Lap Breakout",
+        "h1Count": 1,
+        "h1": "Play an eight-lap Breakout run",
+        "mainCount": 1,
+        "missingAlt": 0,
+        "overflow": false,
+        "canonical": "https://last-lap-breakout.sociobot.in/play",
+        "description": "Play a complete eight-lap Breakout run and finish with a build code.",
+        "ogTitle": "Play — Last Lap Breakout",
+        "twitterTitle": "Play — Last Lap Breakout"
+      },
+      "seriousCriticalAxe": 0,
+      "undersizedTargets": [],
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "route": "/privacy",
+      "status": 200,
+      "structure": {
+        "lang": "en",
+        "title": "Privacy — Last Lap Breakout",
+        "h1Count": 1,
+        "h1": "Your game stays in this browser",
+        "mainCount": 1,
+        "missingAlt": 0,
+        "overflow": false,
+        "canonical": "https://last-lap-breakout.sociobot.in/privacy",
+        "description": "How Last Lap Breakout stores game progress on your device.",
+        "ogTitle": "Privacy — Last Lap Breakout",
+        "twitterTitle": "Privacy — Last Lap Breakout"
+      },
+      "seriousCriticalAxe": 0,
+      "undersizedTargets": [],
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "route": "/terms",
+      "status": 200,
+      "structure": {
+        "lang": "en",
+        "title": "Terms — Last Lap Breakout",
+        "h1Count": 1,
+        "h1": "Play for free",
+        "mainCount": 1,
+        "missingAlt": 0,
+        "overflow": false,
+        "canonical": "https://last-lap-breakout.sociobot.in/terms",
+        "description": "Terms for playing Last Lap Breakout.",
+        "ogTitle": "Terms — Last Lap Breakout",
+        "twitterTitle": "Terms — Last Lap Breakout"
+      },
+      "seriousCriticalAxe": 0,
+      "undersizedTargets": [],
+      "consoleErrors": [],
+      "pageErrors": []
+    },
+    {
+      "route": "/definitely-missing-verification-10",
+      "status": 404,
+      "structure": {
+        "lang": "en",
+        "title": "Page not found — Last Lap Breakout",
+        "h1Count": 1,
+        "h1": "This lap does not exist",
+        "mainCount": 1,
+        "missingAlt": 0,
+        "overflow": false,
+        "canonical": "https://last-lap-breakout.sociobot.in/404",
+        "description": "The requested Last Lap Breakout page was not found.",
+        "ogTitle": "Page not found — Last Lap Breakout",
+        "twitterTitle": "Page not found — Last Lap Breakout"
+      },
+      "seriousCriticalAxe": 0,
+      "undersizedTargets": [],
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 ()"
+      ],
+      "pageErrors": []
+    }
+  ],
+  "demoSandbox": {
+    "initialTime": 60,
+    "laterTime": 59,
+    "duringDemo": {
+      "local": {
+        "last-lap-breakout:settings:v1": "{\"assist\":true,\"muted\":true,\"shake\":false,\"keys\":{\"left\":\"h\",\"right\":\"k\",\"pause\":\"Escape\"}}"
+      },
+      "session": {
+        "demo:last-lap-breakout:settings:v1": "{\"assist\":false,\"muted\":true,\"shake\":true,\"keys\":{\"left\":\"ArrowLeft\",\"right\":\"ArrowRight\",\"pause\":\"p\"}}",
+        "demo:last-lap-breakout:v1": "{\"seed\":441963424,\"rng\":441963424,\"lap\":1,\"lapTime\":58.08333333333344,\"elapsed\":1.9166666666666647,\"score\":35,\"hull\":4,\"status\":\"playing\",\"paddleX\":0.5,\"ball\":{\"x\":0.9393333333333329,\"y\":0.6483333333333335,\"vx\":-0.28,\"vy\":0.38,\"r\":0.014},\"bricks\":[{\"x\":0.07,\"y\":0.12,\"w\":0.09,\"h\":0.042,\"hp\":1,\"maxHp\":1},{\"x\":0.18,\"y\":0.12,\"w\":0.09,\"h\":0.042,\"hp\":1,\"maxHp\":1},{\"x\":0.29000000000000004,\"y\":0.12,\"w\":0.09,\"h\":0.042,\"hp\":1,\"maxHp\":1},{\"x\":0.4,\"y\":0.12,\"w\":0.09,\"h\":0.042,\"hp\":1,\"maxHp\":1},{\"x\":0.51,\"y\":0.12,\"w\":0.09,\"h\":0.042,\"hp\":1,\"maxHp\":1},{\"x\":0.6200000000000001,\"y\":0.12,\"w\":0.09,\"h\":0.042,\"hp\":1,\"maxHp\":1},{\"x\":0.8400000000000001,\"y\":0.12,\"w\":0.09,\"h\":0.042,\"hp\":1,\"maxHp\":1},{\"x\":0.07,\"y\":0.185,\"w\":0.09,\"h\":0.042,\"hp\":1,\"maxHp\":1},{\"x\":0.18,\"y\":0.185,\"w\":0.09,\"h\":0.042,\"hp\":1,\"maxHp\":1},{\"x\":0.29000000000000004,\"y\":0.185,\"w\":0.09,\"h\":0.042,\"hp\":1,\"maxHp\":1},{\"x\":0.4,\"y\":0.185,\"w\":0.09,\"h\":0.042,\"hp\":1,\"maxHp\":1},{\"x\":0.51,\"y\":0.185,\"w\":0.09,\"h\":0.042,\"hp\":1,\"maxHp\":1},{\"x\":0.73,\"y\":0.185,\"w\":0.09,\"h\":0.042,\"hp\":1,\"maxHp\":1},{\"x\":0.8400000000000001,\"y\":0.185,\"w\":0.09,\"h\":0.042,\"hp\":1,\"maxHp\":1},{\"x\":0.07,\"y\":0.25,\"w\":0.09,\"h\":0.042,\"hp\":1,\"maxHp\":1},{\"x\":0.18,\"y\":0.25,\"w\":0.09,\"h\":0.042,\"hp\":1,\"maxHp\":1},{\"x\":0.29000000000000004,\"y\":0.25,\"w\":0.09,\"h\":0.042,\"hp\":1,\"maxHp\":1},{\"x\":0.4,\"y\":0.25,\"w\":0.09,\"h\":0.042,\"hp\":1,\"maxHp\":1},{\"x\":0.6200000000000001,\"y\":0.25,\"w\":0.09,\"h\":0.042,\"hp\":1,\"maxHp\":1},{\"x\":0.8400000000000001,\"y\":0.25,\"w\":0.09,\"h\":0.042,\"hp\":1,\"maxHp\":1}],\"perks\":[],\"draft\":[],\"hits\":1,\"assist\":false,\"tick\":115,\"replay\":[],\"lastInput\":0}"
+      }
+    },
+    "afterReset": {
+      "settings": null,
+      "run": {
+        "seed": 441963424,
+        "rng": 441963424,
+        "lap": 1,
+        "lapTime": 59.00000000000006,
+        "elapsed": 1.0000000000000013,
+        "score": 35,
+        "hull": 4,
+        "status": "playing",
+        "paddleX": 0.5,
+        "ball": {
+          "x": 0.7800000000000025,
+          "y": 0.30000000000000016,
+          "vx": 0.28,
+          "vy": 0.38,
+          "r": 0.014
+        },
+        "bricks": [
+          {
+            "x": 0.07,
+            "y": 0.12,
+            "w": 0.09,
+            "h": 0.042,
+            "hp": 1,
+            "maxHp": 1
+          },
+          {
+            "x": 0.18,
+            "y": 0.12,
+            "w": 0.09,
+            "h": 0.042,
+            "hp": 1,
+            "maxHp": 1
+          },
+          {
+            "x": 0.29000000000000004,
+            "y": 0.12,
+            "w": 0.09,
+            "h": 0.042,
+            "hp": 1,
+            "maxHp": 1
+          },
+          {
+            "x": 0.4,
+            "y": 0.12,
+            "w": 0.09,
+            "h": 0.042,
+            "hp": 1,
+            "maxHp": 1
+          },
+          {
+            "x": 0.51,
+            "y": 0.12,
+            "w": 0.09,
+            "h": 0.042,
+            "hp": 1,
+            "maxHp": 1
+          },
+          {
+            "x": 0.6200000000000001,
+            "y": 0.12,
+            "w": 0.09,
+            "h": 0.042,
+            "hp": 1,
+            "maxHp": 1
+          },
+          {
+            "x": 0.8400000000000001,
+            "y": 0.12,
+            "w": 0.09,
+            "h": 0.042,
+            "hp": 1,
+            "maxHp": 1
+          },
+          {
+            "x": 0.07,
+            "y": 0.185,
+            "w": 0.09,
+            "h": 0.042,
+            "hp": 1,
+            "maxHp": 1
+          },
+          {
+            "x": 0.18,
+            "y": 0.185,
+            "w": 0.09,
+            "h": 0.042,
+            "hp": 1,
+            "maxHp": 1
+          },
+          {
+            "x": 0.29000000000000004,
+            "y": 0.185,
+            "w": 0.09,
+            "h": 0.042,
+            "hp": 1,
+            "maxHp": 1
+          },
+          {
+            "x": 0.4,
+            "y": 0.185,
+            "w": 0.09,
+            "h": 0.042,
+            "hp": 1,
+            "maxHp": 1
+          },
+          {
+            "x": 0.51,
+            "y": 0.185,
+            "w": 0.09,
+            "h": 0.042,
+            "hp": 1,
+            "maxHp": 1
+          },
+          {
+            "x": 0.73,
+            "y": 0.185,
+            "w": 0.09,
+            "h": 0.042,
+            "hp": 1,
+            "maxHp": 1
+          },
+          {
+            "x": 0.8400000000000001,
+            "y": 0.185,
+            "w": 0.09,
+            "h": 0.042,
+            "hp": 1,
+            "maxHp": 1
+          },
+          {
+            "x": 0.07,
+            "y": 0.25,
+            "w": 0.09,
+            "h": 0.042,
+            "hp": 1,
+            "maxHp": 1
+          },
+          {
+            "x": 0.18,
+            "y": 0.25,
+            "w": 0.09,
+            "h": 0.042,
+            "hp": 1,
+            "maxHp": 1
+          },
+          {
+            "x": 0.29000000000000004,
+            "y": 0.25,
+            "w": 0.09,
+            "h": 0.042,
+            "hp": 1,
+            "maxHp": 1
+          },
+          {
+            "x": 0.4,
+            "y": 0.25,
+            "w": 0.09,
+            "h": 0.042,
+            "hp": 1,
+            "maxHp": 1
+          },
+          {
+            "x": 0.6200000000000001,
+            "y": 0.25,
+            "w": 0.09,
+            "h": 0.042,
+            "hp": 1,
+            "maxHp": 1
+          },
+          {
+            "x": 0.8400000000000001,
+            "y": 0.25,
+            "w": 0.09,
+            "h": 0.042,
+            "hp": 1,
+            "maxHp": 1
+          }
+        ],
+        "perks": [],
+        "draft": [],
+        "hits": 1,
+        "assist": false,
+        "tick": 60,
+        "replay": [],
+        "lastInput": 0
+      },
+      "realSettings": "{\"assist\":true,\"muted\":true,\"shake\":false,\"keys\":{\"left\":\"h\",\"right\":\"k\",\"pause\":\"Escape\"}}"
+    },
+    "afterReal": {
+      "demoRun": null,
+      "demoSettings": null,
+      "realSettings": "{\"assist\":true,\"muted\":true,\"shake\":false,\"keys\":{\"left\":\"h\",\"right\":\"k\",\"pause\":\"Escape\"}}"
+    },
+    "requestOrigins": [
+      "https://last-lap-breakout.sociobot.in"
+    ],
+    "requestCount": 6,
+    "consoleErrors": [],
+    "pageErrors": []
+  },
+  "inputRecoveryAndFocus": {
+    "invalidSaveRecovered": true,
+    "firstFocus": {
+      "text": "Skip to main content",
+      "href": "#main"
+    },
+    "focusStyle": {
+      "width": "3px",
+      "style": "solid",
+      "color": "rgb(255, 209, 102)"
+    },
+    "paddle": {
+      "before": 0.5,
+      "afterRight": 0.614
+    },
+    "pausedTick": "47",
+    "dialogFocus": "assist",
+    "focusReturned": true,
+    "historyRestored": true,
+    "errors": []
+  },
+  "touchAndScale": {
+    "start": 0.5,
+    "afterTouch": 0.624,
+    "afterDrag": 0.75,
+    "scaleState": {
+      "scale": 2,
+      "h1": true,
+      "canvas": true,
+      "pause": true,
+      "settings": true
+    }
+  },
+  "reducedMotion": {
+    "media": true,
+    "transitionSeconds": 0.00001,
+    "starOffsets": [
+      "0.000"
+    ],
+    "hits": 1,
+    "shakeCount": 0,
+    "shaking": false
+  },
+  "offlineAndUpdate": {
+    "online": {
+      "active": "activated",
+      "waiting": null,
+      "installing": null,
+      "caches": [
+        "last-lap-breakout-v4"
+      ]
+    },
+    "offline": {
+      "title": "Demo — Last Lap Breakout",
+      "h1": "Play an eight-lap Breakout run",
+      "canvas": 1,
+      "url": "https://last-lap-breakout.sociobot.in/demo"
+    }
+  },
+  "liveFrameRate": {
+    "samples": 900,
+    "median": 16.69999999999891,
+    "p90": 16.700000000000728,
+    "p95": 16.700000000000728,
+    "max": 16.80000000000109,
+    "over34": 0,
+    "status": "playing"
+  },
+  "normalSpeedWin": {
+    "durationSeconds": 481.516,
+    "choices": 7,
+    "timeline": [
+      {
+        "elapsedSeconds": 60,
+        "event": "modifier 1",
+        "state": {
+          "status": "draft",
+          "lap": "1 / 8",
+          "time": "00",
+          "score": "000640",
+          "hull": "◆◆◆◆◇",
+          "heading": "Choose one modifier"
+        }
+      },
+      {
+        "elapsedSeconds": 121,
+        "event": "modifier 2",
+        "state": {
+          "status": "draft",
+          "lap": "2 / 8",
+          "time": "00",
+          "score": "001525",
+          "hull": "◆◆◆◆◇",
+          "heading": "Choose one modifier"
+        }
+      },
+      {
+        "elapsedSeconds": 181,
+        "event": "modifier 3",
+        "state": {
+          "status": "draft",
+          "lap": "3 / 8",
+          "time": "00",
+          "score": "002235",
+          "hull": "◆◆◆◆◇",
+          "heading": "Choose one modifier"
+        }
+      },
+      {
+        "elapsedSeconds": 241,
+        "event": "modifier 4",
+        "state": {
+          "status": "draft",
+          "lap": "4 / 8",
+          "time": "00",
+          "score": "003385",
+          "hull": "◆◆◆◆◇",
+          "heading": "Choose one modifier"
+        }
+      },
+      {
+        "elapsedSeconds": 301,
+        "event": "modifier 5",
+        "state": {
+          "status": "draft",
+          "lap": "5 / 8",
+          "time": "00",
+          "score": "004465",
+          "hull": "◆◆◆◆◇",
+          "heading": "Choose one modifier"
+        }
+      },
+      {
+        "elapsedSeconds": 361,
+        "event": "modifier 6",
+        "state": {
+          "status": "draft",
+          "lap": "6 / 8",
+          "time": "00",
+          "score": "005972",
+          "hull": "◆◆◆◆◇",
+          "heading": "Choose one modifier"
+        }
+      },
+      {
+        "elapsedSeconds": 421,
+        "event": "modifier 7",
+        "state": {
+          "status": "draft",
+          "lap": "7 / 8",
+          "time": "00",
+          "score": "007563",
+          "hull": "◆◆◆◆◇",
+          "heading": "Choose one modifier"
+        }
+      },
+      {
+        "elapsedSeconds": 482,
+        "event": "won",
+        "state": {
+          "status": "won",
+          "lap": "8 / 8",
+          "time": "00",
+          "score": "008937",
+          "hull": "◆◆◆◆◇",
+          "heading": "Run complete"
+        }
+      }
+    ],
+    "finalState": {
+      "status": "won",
+      "lap": "8 / 8",
+      "time": "00",
+      "score": "8,937 points",
+      "heading": "Run complete",
+      "build": "LLB-7B4T5S-CEBQHDW-042X6C3",
+      "banner": "Demo — sample data, nothing is saved"
+    },
+    "requestOrigins": [
+      "https://last-lap-breakout.sociobot.in"
+    ],
+    "requestCount": 6,
+    "consoleErrors": [],
+    "pageErrors": []
+  },
+  "finishedAt": "2026-09-05T20:24:49.282Z"
+}

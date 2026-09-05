@@ -1,0 +1,20 @@
+
+> last-lap-breakout@1.0.0 build
+> tsc --noEmit && vite build
+
+vite v6.4.3 building for production...
+transforming...
+✓ 12 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/terms/index.html             1.53 kB │ gzip:  0.56 kB
+dist/privacy/index.html           1.61 kB │ gzip:  0.58 kB
+dist/demo/index.html              1.61 kB │ gzip:  0.58 kB
+dist/404.html                     1.62 kB │ gzip:  0.59 kB
+dist/play/index.html              1.62 kB │ gzip:  0.59 kB
+dist/index.html                   1.79 kB │ gzip:  0.61 kB
+dist/build/style-qWge9HFd.css    15.93 kB │ gzip:  4.39 kB
+dist/build/style-C8UwdIFa.js      0.71 kB │ gzip:  0.40 kB
+dist/build/notFound-RjyLHn5n.js   0.99 kB │ gzip:  0.55 kB
+dist/build/main-8oI5op97.js      28.56 kB │ gzip: 10.37 kB
+✓ built in 273ms

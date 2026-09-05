@@ -1,0 +1,61 @@
+LIVE RUN 1 / 8 time 60 score 000000 hull ◆◆◆◆◇
+LIVE RUN 1 / 8 time 45 score 000140 hull ◆◆◆◆◇
+LIVE RUN 1 / 8 time 30 score 000140 hull ◆◆◆◆◇
+LIVE RUN 1 / 8 time 15 score 000140 hull ◆◆◆◆◇
+LIVE RUN modifier 1 after 1 / 8
+LIVE RUN 2 / 8 time 60 score 000640 hull ◆◆◆◆◇
+LIVE RUN 2 / 8 time 45 score 000955 hull ◆◆◆◆◇
+LIVE RUN 2 / 8 time 30 score 001025 hull ◆◆◆◆◇
+LIVE RUN 2 / 8 time 15 score 001025 hull ◆◆◆◆◇
+LIVE RUN modifier 2 after 2 / 8
+LIVE RUN 3 / 8 time 60 score 001525 hull ◆◆◆◆◇
+LIVE RUN 3 / 8 time 45 score 001735 hull ◆◆◆◆◇
+LIVE RUN 3 / 8 time 30 score 001735 hull ◆◆◆◆◇
+LIVE RUN 3 / 8 time 15 score 001735 hull ◆◆◆◆◇
+LIVE RUN modifier 3 after 3 / 8
+LIVE RUN 4 / 8 time 60 score 002235 hull ◆◆◆◆◇
+LIVE RUN 4 / 8 time 45 score 002515 hull ◆◆◆◆◇
+LIVE RUN 4 / 8 time 30 score 002585 hull ◆◆◆◆◇
+LIVE RUN 4 / 8 time 15 score 002585 hull ◆◆◆◆◇
+LIVE RUN modifier 4 after 4 / 8
+LIVE RUN 5 / 8 time 60 score 003385 hull ◆◆◆◆◇
+LIVE RUN 5 / 8 time 45 score 003665 hull ◆◆◆◆◇
+LIVE RUN 5 / 8 time 30 score 003665 hull ◆◆◆◆◇
+LIVE RUN 5 / 8 time 15 score 003665 hull ◆◆◆◆◇
+LIVE RUN modifier 5 after 5 / 8
+LIVE RUN 6 / 8 time 60 score 004465 hull ◆◆◆◆◇
+LIVE RUN 6 / 8 time 45 score 004892 hull ◆◆◆◆◇
+LIVE RUN 6 / 8 time 30 score 004941 hull ◆◆◆◆◇
+LIVE RUN 6 / 8 time 15 score 004941 hull ◆◆◆◆◇
+LIVE RUN modifier 6 after 6 / 8
+LIVE RUN 7 / 8 time 60 score 005972 hull ◆◆◆◆◇
+LIVE RUN 7 / 8 time 45 score 006434 hull ◆◆◆◆◇
+LIVE RUN 7 / 8 time 30 score 006483 hull ◆◆◆◆◇
+LIVE RUN 7 / 8 time 15 score 006483 hull ◆◆◆◆◇
+LIVE RUN modifier 7 after 7 / 8
+LIVE RUN 8 / 8 time 60 score 007563 hull ◆◆◆◆◇
+LIVE RUN 8 / 8 time 45 score 008137 hull ◆◆◆◆◇
+LIVE RUN 8 / 8 time 30 score 008137 hull ◆◆◆◆◇
+LIVE RUN 8 / 8 time 15 score 008137 hull ◆◆◆◆◇
+LIVE AUDIT PASS
+{
+  "frameRate": {
+    "samples": 900,
+    "median": 16.69999999999891,
+    "p90": 16.700000000000728,
+    "p95": 16.700000000000728,
+    "max": 16.80000000000109,
+    "over34": 0,
+    "status": "playing"
+  },
+  "normalSpeedWin": {
+    "status": "won",
+    "lap": "8 / 8",
+    "time": "00",
+    "score": "8,937 points",
+    "heading": "Run complete",
+    "build": "LLB-7B4T5S-CEBQHDW-042X6C3",
+    "banner": "Demo — sample data, nothing is saved"
+  },
+  "durationSeconds": 481.516
+}

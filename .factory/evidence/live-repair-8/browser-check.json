@@ -1,0 +1,63 @@
+{
+  "desktopFirst": {
+    "h1": "Finish a Breakout run in eight minutes",
+    "audience": "For short breaks: clear eight fixed laps, choose modifiers after the first seven, and finish with a build code.",
+    "action": "Try it with sample data",
+    "actionBottom": 781.3125,
+    "boardVisible": true
+  },
+  "mobileFirst": {
+    "h1": "Finish a Breakout run in eight minutes",
+    "audience": "For short breaks: clear eight fixed laps, choose modifiers after the first seven, and finish with a build code.",
+    "action": "Try it with sample data",
+    "actionBottom": 729.796875,
+    "boardBottom": 418.2576599121094,
+    "overflow": false
+  },
+  "demo": {
+    "activeLabel": true,
+    "reset": true,
+    "startForReal": true,
+    "realSettingsPreserved": true
+  },
+  "axe": [
+    {
+      "path": "/",
+      "status": 200,
+      "seriousOrCritical": []
+    },
+    {
+      "path": "/demo",
+      "status": 200,
+      "seriousOrCritical": []
+    },
+    {
+      "path": "/play",
+      "status": 200,
+      "seriousOrCritical": []
+    },
+    {
+      "path": "/privacy",
+      "status": 200,
+      "seriousOrCritical": []
+    },
+    {
+      "path": "/terms",
+      "status": 200,
+      "seriousOrCritical": []
+    },
+    {
+      "path": "/missing-page",
+      "status": 404,
+      "seriousOrCritical": []
+    }
+  ],
+  "validConsoleErrors": [],
+  "expected404ConsoleErrors": [
+    {
+      "url": "https://last-lap-breakout.sociobot.in/missing-page",
+      "text": "Failed to load resource: the server responded with a status of 404 ()"
+    }
+  ],
+  "pageErrors": []
+}

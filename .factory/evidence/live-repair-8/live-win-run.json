@@ -1,0 +1,45 @@
+{
+  "restart": {
+    "lap": "1 / 8",
+    "hull": "◆◆◆◆◆",
+    "time": "60",
+    "score": "000000"
+  },
+  "lapEvents": [
+    {
+      "lap": 1,
+      "selectedWith": "1"
+    },
+    {
+      "lap": 2,
+      "selectedWith": "1"
+    },
+    {
+      "lap": 3,
+      "selectedWith": "1"
+    },
+    {
+      "lap": 4,
+      "selectedWith": "1"
+    },
+    {
+      "lap": 5,
+      "selectedWith": "1"
+    },
+    {
+      "lap": 6,
+      "selectedWith": "1"
+    },
+    {
+      "lap": 7,
+      "selectedWith": "1"
+    }
+  ],
+  "win": {
+    "heading": "Run complete",
+    "score": "8,461 points",
+    "build": "LLB-7B4T5S-CEBQHDW-18LS1Y3",
+    "demoLabel": true
+  },
+  "errors": []
+}

@@ -49,6 +49,6 @@ Deploy the contents of `dist/` as a static site. `staticwebapp.config.json` supp
 - [Tested claims](.factory/claims.json)
 - [Handoff](.factory/handoff.md)
 
-The generated orbital scene is original to this product. Its prompt and review are stored in `assets/src/orbital-breakout.json`. The Silkscreen font is licensed under the SIL Open Font License in `assets/src/OFL-Silkscreen.txt`.
+The scene prompt and review are stored in `assets/src/orbital-breakout.json`. The Silkscreen font is licensed under the SIL Open Font License in `assets/src/OFL-Silkscreen.txt`.
 
 Copyright © 2026 Param Factory. Source code is released under the [MIT License](LICENSE).

@@ -1,6 +1,6 @@
 # Landing copy audit
 
-Audited on 2026-09-02. Counts treat numbers and hyphenated terms as one word. No line exceeds 22 words. No banned word appears.
+Audited on 2026-09-05. Counts treat numbers and hyphenated terms as one word. No line exceeds 22 words. No banned word appears.
 
 | Landing text | Words | Result |
 | --- | ---: | --- |
@@ -12,7 +12,7 @@ Audited on 2026-09-02. Counts treat numbers and hyphenated terms as one word. No
 | Start a new run. | 5 | Pass |
 | Eight times 60 seconds. | 4 | Pass |
 | Then the run ends. | 4 | Pass |
-| Free. No account. | 3 | Pass |
+| Free. No account. | 3 | Pass; `free-play` |
 | No purchases or ads. | 4 | Pass |
 | Keyboard and touch. | 3 | Pass |
 | Assist mode included. | 3 | Pass |

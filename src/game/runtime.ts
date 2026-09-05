@@ -272,7 +272,7 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
       const y = (i * 251) % h;
       context.fillRect(x, y, i % 3 === 0 ? 3 : 2, i % 3 === 0 ? 3 : 2);
     }
-    context.strokeStyle = '#293052'; context.lineWidth = 3; context.setLineDash([12, 18]);
+    context.strokeStyle = '#5969a4'; context.lineWidth = 3; context.setLineDash([12, 18]);
     context.beginPath(); context.moveTo(0, h * 0.055); context.lineTo(w, h * 0.055); context.stroke(); context.setLineDash([]);
 
     for (const brick of state.bricks) {
@@ -286,7 +286,7 @@ export function mountGame(host: HTMLElement, options: MountOptions = {}): () => 
     }
     const width = paddleWidth(state);
     const px = (state.paddleX - width / 2) * w, py = h * 0.88;
-    context.fillStyle = '#293052'; context.fillRect(px - 8, py + 10, width * w + 16, 25);
+    context.fillStyle = '#5969a4'; context.fillRect(px - 8, py + 10, width * w + 16, 25);
     context.fillStyle = '#64f4c2'; context.fillRect(px, py, width * w, 25);
     context.fillStyle = '#f4f1df';
     context.beginPath(); context.arc(state.ball.x * w, state.ball.y * h, state.ball.r * w, 0, Math.PI * 2); context.fill();

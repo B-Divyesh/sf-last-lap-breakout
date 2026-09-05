@@ -35,6 +35,26 @@ async function finishAcceleratedRun(page: import('@playwright/test').Page): Prom
   await expect(page.getByRole('heading', { name: 'Run complete' })).toBeVisible();
 }
 
+type PaymentWatch = { paymentRequests: string[]; popups: string[] };
+
+function watchForPayment(page: import('@playwright/test').Page): PaymentWatch {
+  const watch: PaymentWatch = { paymentRequests: [], popups: [] };
+  page.on('request', request => {
+    if (/(checkout|payment|purchase|billing|paywall|charge)/i.test(request.url())) watch.paymentRequests.push(request.url());
+  });
+  page.on('popup', popup => watch.popups.push(popup.url()));
+  return watch;
+}
+
+async function expectCompletedWithoutPayment(page: import('@playwright/test').Page, watch: PaymentWatch): Promise<void> {
+  await finishAcceleratedRun(page);
+  await expect(page.getByLabel('Build code')).toBeVisible();
+  expect(watch.paymentRequests).toEqual([]);
+  expect(watch.popups).toEqual([]);
+  await expect(page.getByRole('button', { name: /(pay|buy|checkout|purchase)/i })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: /(pay|buy|checkout|purchase)/i })).toHaveCount(0);
+}
+
 function advanceExactlyOneLap(run: RunState): void {
   expect(run.lapTime).toBe(LAP_SECONDS);
   // Keep the orb inert so this test proves the fixed timer rather than paddle skill.
@@ -63,6 +83,27 @@ test('@claim:finite-run a title-screen sample reaches the eighth-lap result', as
   await expect(page).toHaveURL(/\/\?demo=1&test=1$/);
   await finishAcceleratedRun(page);
   await expect(page.getByLabel('Build code')).toHaveValue('LLB-7B4T5S-CEBQHDW-0SBRZTA');
+});
+
+test('@claim:free-play real and sample runs finish without payment', async ({ page, browser }) => {
+  const realWatch = watchForPayment(page);
+  await page.goto('/?test=1');
+  await page.getByRole('link', { name: 'Start a new run' }).first().click();
+  await expect(page).toHaveURL('/play?test=1');
+  await expectCompletedWithoutPayment(page, realWatch);
+
+  const demoContext = await browser.newContext();
+  const demoPage = await demoContext.newPage();
+  const demoWatch = watchForPayment(demoPage);
+  try {
+    await demoPage.goto('/?test=1');
+    await demoPage.getByRole('link', { name: 'Try it with sample data' }).click();
+    await expect(demoPage).toHaveURL(/\/\?demo=1&test=1$/);
+    await expect(demoPage.getByText('Demo — sample data, nothing is saved')).toBeVisible();
+    await expectCompletedWithoutPayment(demoPage, demoWatch);
+  } finally {
+    await demoContext.close();
+  }
 });
 
 test('@claim:demo-sandbox demo is marked and uses a separate namespace', async ({ page }) => {

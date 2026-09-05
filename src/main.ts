@@ -24,7 +24,7 @@ function footer(): string {
   return `<footer class="site-footer">
     <p>Eight fixed Breakout laps for a short break.</p>
     <div><a href="/privacy" data-link>Privacy</a><a href="/terms" data-link>Terms</a><a href="https://hello-factory.sociobot.in" rel="external">Built by Param Factory <span class="sr-only">(external site)</span></a></div>
-    <p>Original generated scene · v1.0.0</p>
+    <p>v1.0.0</p>
   </footer>`;
 }
 

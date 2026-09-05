@@ -8,7 +8,7 @@ Last Lap Breakout uses a pixel/demoscene cockpit. A dark orbital track, scanline
 
 - Void `#080a16`: page and playfield background.
 - Deck `#11152a`: solid information plates.
-- Rail `#293052`: borders and inactive track marks.
+- Rail `#5969a4`: borders and inactive track marks. It has 3.74:1 contrast on Void and 3.42:1 on Deck, so the non-text UI edges remain visible.
 - Paper `#f4f1df`: primary text (14.7:1 on Void).
 - Cool ink `#aeb8d8`: secondary text (8.4:1 on Void).
 - Boost `#64f4c2`: primary action and player paddle; dark text `#07130f` (13.2:1).

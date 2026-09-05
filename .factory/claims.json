@@ -7,6 +7,13 @@
     "sandbox": "fresh browser context at /?test=1; start the sample, choose modifiers by key and button, and assert the eighth-lap result; the same test advances the fixed core through exactly 8 × 60 seconds"
   },
   {
+    "id": "free-play",
+    "claim": "No payment is required to start or finish a real or sample run.",
+    "where": "landing facts, terms, README",
+    "test": "npx playwright test --grep @claim:free-play",
+    "sandbox": "fresh browser contexts start real and sample runs from the landing page, reach each result screen, and record navigation, payment-related requests, popups, and payment controls"
+  },
+  {
     "id": "demo-sandbox",
     "claim": "The ?demo=1 sample starts in one click, is separate from real progress and settings, and is discarded when starting for real.",
     "where": "landing action, demo banner, README",

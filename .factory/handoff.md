@@ -3,6 +3,7 @@
 ## Release
 
 - Implementation commit: `188df4ae98193eb7f6608c6885b4c46704d9ace6` (`fix: close claims and palette review findings`).
+- Documentation and evidence commit: `30f64ab4539ca2b96ba70a35cbceaa5be4ca9622` (`docs: record repair 8 verification`).
 - Deployment: static production upload completed for `sf-last-lap-breakout`; `https://last-lap-breakout.sociobot.in` returned HTTPS 200 afterwards.
 - Live identity: the deployed `main-8oI5op97.js` and `style-qWge9HFd.css` SHA-256 values match this commit's `dist/` exactly.
 - Catalog description: `.factory/catalog-description.txt` is verb-first and 65 characters. Its required copy is at `/work/.evidence/catalog-description.txt`.
